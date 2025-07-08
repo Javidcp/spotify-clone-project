@@ -24,6 +24,7 @@ const Navbar = () => {
 
     const isLogged = useSelector(state => state.auth.isAuthenticated);
     const user = useSelector(state => state.auth.user);
+    const isPremiumed = user?.isPremium
 
 
 
@@ -97,9 +98,9 @@ const Navbar = () => {
             ) : (
                 <>
                     <div className='flex items-center mr-1 gap-3'>
-                        <button onClick={() => navigate('/premium')} className='bg-white py-2 px-4 rounded-full cursor-pointer'>
+                        {!isPremiumed &&<button onClick={() => navigate('/premium')} className='bg-white py-2 px-4 rounded-full cursor-pointer'>
                             Explore Premium
-                        </button>
+                        </button>}
                         <button onClick={() => navigate('/notification')} className='relative'>
                             <Bell size={20} className='text-[#818181]' />
                             {unreadCount > 0 &&<span className='bg-green-400 absolute top-[-6px]  w-4 h-4 rounded-full text-[10px]'>{unreadCount}</span>}

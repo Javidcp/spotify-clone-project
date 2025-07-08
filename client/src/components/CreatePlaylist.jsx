@@ -1,107 +1,162 @@
 import React, { useState } from 'react';
-import {  Pen } from 'lucide-react';
-
+import api from '../utils/axios';
+import { toast } from 'react-toastify';
+import { useForm } from 'react-hook-form';
 
 const CreatePlaylist = () => {
+  const { register, handleSubmit, formState: { errors, isSubmitting }, reset, watch } = useForm();
   const [showModal, setShowModal] = useState(false);
-  const [playlistName, setPlaylistName] = useState('')
+  
+  // Watch playlistName input value live to display in UI header
+  const playlistName = watch('playlistName')?.trim() || '';
+
+  const onSubmit = async (data) => {
+    const trimmedName = data.playlistName.trim();
+
+    if (!trimmedName) {
+      toast.info("Please enter a valid playlist name.");
+      return;
+    }
+
+    if (!data.image || !data.image[0]) {
+      toast.info("Please select an image for the playlist.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("name", trimmedName);
+    formData.append("description", data.description || "");
+    formData.append("image", data.image[0]);
+
+    try {
+      const res = await api.post("/playlist", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
+
+      toast.success(`Created playlist: ${res.data.playlists.name}`);
+      reset();
+      setShowModal(false); // Close modal on success
+    } catch (error) {
+      const message = error.response?.data?.message || "Something went wrong!";
+      toast.error(`Error: ${message}`);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-[#121212] rounded-t-md overflow-hidden text-white flex">
+    <div className="min-h-screen bg-[#121212] rounded-t-md overflow-hidden text-white flex flex-col md:flex-row">
       <div className="flex-1 overflow-y-auto">
-        <div className="flex items-end p-6 bg-[#212121]">
-          <div
-            className="w-48 h-48 bg-[#121212] flex items-center justify-center mr-6 shadow-xl cursor-pointer"
-            onClick={() => setShowModal(true)}
-          >
+        <div className="flex items-end p-6 bg-[#212121] cursor-pointer" onClick={() => setShowModal(true)}>
+          <div className="w-48 h-48 bg-[#121212] flex items-center justify-center mr-6 shadow-xl">
             <span className="text-white text-8xl opacity-70">&#9835;</span>
           </div>
 
-          <div className="flex flex-col justify-end text-white cursor-pointer" onClick={() => setShowModal(true)}>
+          <div className="flex flex-col justify-end text-white">
             <p className="text-sm uppercase tracking-wider text-gray-300 mb-1">
               Public Playlist
             </p>
-            <h1 className="text-7xl font-bold leading-tight mb-2">
+            <h1 className="text-7xl font-bold leading-tight mb-2 truncate max-w-xs">
               {playlistName || 'MyPlaylist#1'}
             </h1>
-            <p className="text-base text-gray-300">
-              Name
-            </p>
+            <p className="text-base text-gray-300">Name</p>
           </div>
         </div>
 
         <div className="flex items-center px-6 py-4 bg-[#121212]">
-          <button className="text-gray-400 hover:text-white mr-4 text-3xl font-bold">
+          <button
+            aria-label="More options"
+            className="text-gray-400 hover:text-white mr-4 text-3xl font-bold"
+          >
             ...
           </button>
-          <button className="text-gray-400 hover:text-white text-2xl ml-auto">
+          <button
+            aria-label="Menu"
+            className="text-gray-400 hover:text-white text-2xl ml-auto"
+          >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
         </div>
-        <div className="p-6 bg-[#121212]">
-          <p className="text-xl text-white mb-4">Let's find something for your playlist</p>
-          <div className="flex items-center bg-[#282828] rounded-md max-w-md">
-            <input
-              type="text"
-              placeholder="Search for songs or episodes"
-              className="flex-1 bg-transparent border-none outline-none text-white p-1 px-3 text-base placeholder-gray-400"
-            />
-          </div>
-        </div>
+
+        
       </div>
 
       {showModal && (
-        <div className="fixed inset-0 bg-transparent  backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-[#1a1a1a] text-white rounded-md w-[550px] h-[400px] p-6 relative">
-            <h2 className="text-2xl font-bold mb-4">Edit details</h2>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="edit-details-title"
+          className="fixed inset-0  bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50"
+        >
+          <div className="bg-[#1a1a1a] text-white rounded-md w-[550px] max-w-full h-[400px] p-6 relative flex flex-col">
+            <h2 id="edit-details-title" className="text-2xl font-bold mb-4">Edit details</h2>
 
-            <div className="flex space-x-6">
-              <div className="relative w-50 h-50 bg-[#282828] flex items-center justify-center">
-                <label className=" w-full h-full p-1 cursor-pointer transition-colors">
-                    <Pen size={100} className='absolute right-[30%] top-[30%]' />
-                    <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                    />
-                    </label>
-              </div>
+            <form
+              onSubmit={handleSubmit(onSubmit)}
+              className="space-y-3 flex flex-col flex-1 overflow-auto"
+            >
+              <input
+                type="file"
+                accept="image/*"
+                aria-invalid={errors.image ? "true" : "false"}
+                className={`text-sm text-[#ccc] bg-[#1e1e1e] rounded-md border p-2 max-w-full mb-3 ${
+                  errors.image ? "border-red-500" : "border-[#696969]"
+                }`}
+                {...register("image", {
+                  required: "Image is required",
+                  validate: {
+                    isImage: (fileList) =>
+                      fileList &&
+                      fileList[0] &&
+                      fileList[0].type.startsWith("image/")
+                        ? true
+                        : "Only image files are allowed"
+                  }
+                })}
+              />
+              {errors.image && <p role="alert" className="text-red-500">{errors.image.message}</p>}
 
-              <div className="flex flex-col flex-1">
-                <input
-                  type="text"
-                  placeholder="Playlist name"
-                  value={playlistName}
-                  onChange={(e) => setPlaylistName(e.target.value)}
-                  
-                  className="bg-[#393939] rounded px-3 py-2.5 text-white mb-4 outline-none"
-                />
-                <textarea
-                  placeholder="Add an optional description"
-                  className="bg-[#393939]  rounded px-3 py-2 text-white h-35 outline-none"
-                />
-              </div>
-            </div>
+              <input
+                type="text"
+                aria-invalid={errors.playlistName ? "true" : "false"}
+                {...register("playlistName", { required: "Playlist name is required" })}
+                placeholder="Enter playlist name"
+                className={`w-full border p-2 rounded-md bg-[#1e1e1e] text-white ${
+                  errors.playlistName ? "border-red-500" : "border-[#696969]"
+                }`}
+              />
+              {errors.playlistName && <p role="alert" className="text-red-500">{errors.playlistName.message}</p>}
 
-            <div className="absolute right-6">
+              <textarea
+                {...register("description")}
+                placeholder="Enter description (optional)"
+                className="w-full border p-2 h-24 rounded-md bg-[#1e1e1e] text-white border-[#696969]"
+              />
+
               <button
-                className="bg-white text-black font-semibold mt-5 px-6 py-2 rounded-full"
-                onClick={() => setShowModal(false)}
+                type="submit"
+                disabled={isSubmitting}
+                className={`p-3 mt-2 font-mono rounded-lg w-full ${
+                  isSubmitting
+                    ? "bg-gray-500 cursor-not-allowed"
+                    : "bg-green-400 text-black hover:bg-green-300"
+                }`}
               >
-                Save
+                {isSubmitting ? "Creating..." : "Create Playlist"}
               </button>
-            </div>
+            </form>
+
             <button
               onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-white text-xl"
-              >
+              aria-label="Close modal"
+              className="absolute top-4 right-4 text-white text-3xl leading-none focus:outline-none"
+            >
               &times;
             </button>
-                <div className='absolute bottom-5 text-xs font-bold'>
-                    By proceeding, you agree to give spotify access to the image you choose to upload. Please make sure you have the right to upload the image
-                </div>
+
+            <div className='absolute bottom-5 left-6 right-6 text-xs font-bold text-gray-400'>
+              By proceeding, you agree to give Spotify access to the image you choose to upload. Please make sure you have the right to upload the image.
+            </div>
           </div>
         </div>
       )}

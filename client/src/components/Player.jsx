@@ -7,8 +7,6 @@ import { MdOutlineForward10, MdOutlineReplay10  } from "react-icons/md";
 import useAuth from '../hooks/useAuth';
 import Modal from './Modal';
 
-
-
 const BottomPlayer = () => {
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const navigate = useNavigate();
@@ -17,7 +15,6 @@ const BottomPlayer = () => {
 
   const { isAuthenticated } = useAuth()
 
-
   const {
     currentTrack,
     isPlaying,
@@ -25,8 +22,10 @@ const BottomPlayer = () => {
     duration,
     volume,
     updateCurrentTime,
+    updateDuration,
+    seekForward,
+    seekBackward,
     isMuted,
-    setDuration,
     isLoading,
     playPause,
     skipNext,
@@ -41,7 +40,7 @@ const BottomPlayer = () => {
     const audio = audioRef.current;
 
     const handleMetadataLoaded = () => {
-      setDuration(audio.duration);
+      updateDuration(audio.duration);
     };
 
     const handleTimeUpdate = () => {
@@ -55,7 +54,7 @@ const BottomPlayer = () => {
       audio.removeEventListener('loadedmetadata', handleMetadataLoaded);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
     };
-  }, [currentTrack, audioRef, setDuration, updateCurrentTime]);
+  }, [currentTrack, audioRef, updateDuration, updateCurrentTime]);
 
   const handlePlayPause = () => {
     setLocalLoading(true);
@@ -79,31 +78,8 @@ const BottomPlayer = () => {
     updateCurrentTime(newTime);
   };
 
-const handleSeekForward = () => {
-  if (!audioRef?.current || !duration) return;
-  
-  const currentTime = audioRef.current.currentTime;
-  const newTime = Math.min(currentTime + 10, duration);
-  
-  // Update the audio element's current time
-  audioRef.current.currentTime = newTime;
-  
-  // Update the Redux state
-  updateCurrentTime(newTime);
-};
-
-const handleSeekBackward = () => {
-  if (!audioRef?.current) return;
-  
-  const currentTime = audioRef.current.currentTime;
-  const newTime = Math.max(currentTime - 10, 0);
-  
-  // Update the audio element's current time
-  audioRef.current.currentTime = newTime;
-  
-  // Update the Redux state
-  updateCurrentTime(newTime);
-};
+const handleSeekForward = () => seekForward(10);
+const handleSeekBackward = () => seekBackward(10);
 
   const handleVolumeChange = (e) => {
     const newVolume = e.target.value / 100;
@@ -138,6 +114,7 @@ const handleSeekBackward = () => {
             onClick={handleSeekBackward}
             className="text-gray-400 hover:text-white transition-colors"
             title="Back 10s"
+            disabled={localLoading}
           >
             <MdOutlineReplay10   className="w-5 h-5" />
           </button>
@@ -161,6 +138,7 @@ const handleSeekBackward = () => {
             onClick={handleSeekForward}
             className="text-gray-400 hover:text-white transition-colors"
             title="Forward 10s"
+            disabled={localLoading}
           >
             <MdOutlineForward10 className="w-5 h-5" />
           </button>
@@ -226,7 +204,6 @@ const handleSeekBackward = () => {
         </button>
       </div>
 
-
     </div>
     ) : (
       <DraggableCircle onClick={() => setIsMinimized(false)} />
@@ -237,8 +214,6 @@ const handleSeekBackward = () => {
 };
 
 export default BottomPlayer;
-
-
 
 const DraggableCircle = ({ onClick }) => {
   const circleRef = useRef(null);

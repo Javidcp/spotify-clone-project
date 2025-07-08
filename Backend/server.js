@@ -19,6 +19,7 @@ const withdrawRoutes = require("./routes/User/withdrawRoutes");
 const couponRoutes = require("./routes/Admin/couponRoute");
 const notificationRoutes = require("./routes/Admin/notificationRoute")
 const likedSongsRoutes = require("./routes/User/likedSongsRoutes")
+const playlistRoutes = require("./routes/User/playlistRoutes")
 const { errorMiddleware } = require("./helper/errorMiddleware");
 const verifyToken = require("./middleware/verifyToken");
 const User = require("./models/User");
@@ -70,6 +71,7 @@ app.use('/api/notifications', notificationRoutes)
 app.use('/api/create-checkout-session', paymentGateway)
 app.use("/api/payment-confirm", confirmPayment);
 app.use('/api/likedsongs', likedSongsRoutes)
+app.use('/api', playlistRoutes)
 
 
 route.get('/me', verifyToken, async (req, res) => {
@@ -87,7 +89,6 @@ route.get('/me', verifyToken, async (req, res) => {
 app.use('/api/auth', route);
 
 app.use(errorMiddleware)
-
 
 server.listen(process.env.PORT, () => {
     console.log(`Server is running on ${process.env.PORT}`);

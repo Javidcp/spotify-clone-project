@@ -10,6 +10,7 @@ const SideBar = () => {
     const navigate = useNavigate()
     const [ likes, setLikes ] = useState([])
     const { isAuthenticated } = useAuth()
+    const [ playlists, setPlaylists ] = useState([])
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken")
@@ -26,6 +27,18 @@ const SideBar = () => {
             }
         }
         fetchSongs()
+    }, [])
+
+    useEffect(() => {
+        const fetchPlaylist = async () => {
+            try{
+                const res = await api.get('/playlist')
+                setPlaylists(res.data)
+            } catch (err) {
+                console.error("Error to fetching playlist:", err.message)
+            }
+        }
+        fetchPlaylist()
     }, [])
 
     return (
@@ -84,6 +97,31 @@ const SideBar = () => {
                     }
                 </div>
             )}
+
+            {!full && playlists.map((p) => (
+    <div 
+        key={p._id} 
+        onClick={() => navigate(`/createdplaylist/${p._id}`)} 
+        className='flex items-center gap-4 cursor-pointer hover:bg-[#242424] rounded-md w-full'
+    >
+        <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover" />
+        
+    </div>
+))}
+
+
+{full && playlists.map((p) => (
+    <div 
+        key={p._id} 
+        onClick={() => navigate(`/createdplaylist/${p._id}`)} 
+        className='flex items-center gap-4 cursor-pointer hover:bg-[#242424] rounded-md w-full'
+    >
+        <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover" />
+        <span className='text-sm'>{p.name}</span>
+    </div>
+))}
+
+            
         </div>
     )
 }

@@ -17,6 +17,8 @@ import {
 import BottomPlayer from './Player';
 import api from '../utils/axios';
 import Dot from "./Dot";
+import useAuth from '../hooks/useAuth';
+import { toast } from 'react-toastify';
 
 const LIKED_SONGS_PLAYLIST_ID = 'likedsong';
 
@@ -208,6 +210,9 @@ const LikedSong = () => {
     const [loading, setLoading] = useState(true);
     const [dropdownOpen, setDropdownOpen] = useState(null);
     const [visibleSongsCount, setVisibleSongsCount] = useState(5);
+    const { user } = useAuth()
+
+    const isPremiumUser = user?.isPremium
     
     const scrollRef = useRef(null);
     const dispatch = useDispatch();
@@ -401,6 +406,74 @@ const LikedSong = () => {
         }
     }, [currentTrack, isCurrentPlaylist, musics, handlePlay, dispatch, isPlaying]);
 
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const downloadAllSongs = async () => {
+        if (!isPremiumUser) {
+            toast.error('Premium subscription required for downloads');
+            return;
+        }
+
+        if (isDownloading) {
+            return;
+        }
+
+        setIsDownloading(true);
+
+        try {
+            const songsToDownload = visibleSongs.filter(song => song.url || song.audioUrl);
+
+            if (songsToDownload.length === 0) {
+                toast.info('No songs available for download');
+                setIsDownloading(false);
+                return;
+            }
+
+            const confirmed = window.confirm(`Download ${songsToDownload.length} songs?`);
+            if (!confirmed) {
+                setIsDownloading(false);
+                return;
+            }
+
+            for (let i = 0; i < songsToDownload.length; i++) {
+                const song = songsToDownload[i];
+
+                try {
+                    const response = await fetch(song.url || song.audioUrl);
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const blob = await response.blob();
+
+                    const blobUrl = window.URL.createObjectURL(blob);
+
+                    const cleanTitle = (song.title || 'song').replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = `${cleanTitle}.mp3`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    window.URL.revokeObjectURL(blobUrl);
+
+                    if (i < songsToDownload.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                } catch (error) {
+                    console.error(`Failed to download ${song.title}:`, error);
+                }
+            }
+
+            alert(`Started downloading ${songsToDownload.length} songs`);
+        } catch (error) {
+            console.error('Download error:', error);
+            alert('Download failed. Please try again.');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+
     const MainPlayButton = useMemo(() => (
         <button
             className="bg-green-500 hover:bg-green-400 rounded-full flex items-center justify-center w-12 h-12 transition-all hover:scale-105"
@@ -418,11 +491,23 @@ const LikedSong = () => {
         <div className="flex items-center justify-between p-4 bg-[#141414] sticky top-[-5px] z-20">
             <div className="flex items-center space-x-4">
                 {MainPlayButton}
-                {!isScrolled && (
-                    <button className="text-gray-400 hover:text-white transition-colors">
-                        <Download className="w-6 h-6" />
+                {isPremiumUser && (
+                    <button
+                        className={`text-gray-400 hover:text-white transition-colors ${
+                            isDownloading ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        onClick={downloadAllSongs}
+                        disabled={isDownloading}
+                        title={isDownloading ? 'Downloading...' : 'Download all visible songs'}
+                    >
+                        {isDownloading ? (
+                            <div className="w-6 h-6 border-2 border-gray-400 border-t-white rounded-full animate-spin"></div>
+                        ) : (
+                            <Download className="w-6 h-6" />
+                        )}
                     </button>
                 )}
+
             </div>
             <div className="relative">
                 <button className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors" onClick={toggleDropdown}>

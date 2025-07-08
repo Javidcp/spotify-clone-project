@@ -15,7 +15,7 @@ const GenrePlaylistCreator = () => {
   const [totalPage, setTotalPage] = useState(1)
   const limit = 5
     
-    useEffect(() => {
+  useEffect(() => {
     fetchPlaylists();
   }, [page]);
   const fetchPlaylists = async () => {

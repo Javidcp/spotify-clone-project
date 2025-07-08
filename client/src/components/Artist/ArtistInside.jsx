@@ -2,12 +2,14 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import { usePlayer } from "../../hooks/redux";
 import api from "../../utils/axios";
-import { Play, Pause, MoreHorizontal, Clock } from "lucide-react";
+import { Play, Pause, MoreHorizontal, Clock, Download } from "lucide-react";
 import BottomPlayer from "../Player";
 import { useDispatch } from "react-redux";
 import { addRecentlyPlayedArtist  } from "../../redux/recentlyPlayedPlaylistsSlice";
 import Verify from '../../assets/tick.png'
 import LikeButton from "../LikkedButton";
+import useAuth from "../../hooks/useAuth";
+import Dot from '../Dot'
 
 const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay, setDropdownOpen, dropdownOpen }) => (
     <div
@@ -71,6 +73,7 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
                             // console.log('Clicked:', item.label);
                             setDropdownOpen(null);
                         }}
+                        song={song?._id}
                     />
                 </div>
             )}
@@ -85,6 +88,8 @@ const ArtistPage = () => {
     const [loading, setLoading] = useState(true);
     const [dropdownOpen, setDropdownOpen] = useState(null);
     const dispatch = useDispatch()
+    const { user } = useAuth()
+    const isPremiumUser = user?.isPremium
 
     const {
         currentTrackId,
@@ -139,10 +144,79 @@ const ArtistPage = () => {
             playTrack(song.id, index);
         }
     }, [currentTrackId, currentPlaylistId, artistId, playPause, playTrack, switchPlaylist, artistSongs]);
-
+    
     const isArtistPlaylist = currentPlaylistId === artistId;
 
+    
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const downloadAllSongs = async () => {
+        if (!isPremiumUser) {
+            alert('Premium subscription required for downloads');
+            return;
+        }
+
+        if (isDownloading) {
+            return;
+        }
+
+        setIsDownloading(true);
+
+        try {
+            const songsToDownload = artistSongs.filter(song => song.url || song.audioUrl);
+
+            if (songsToDownload.length === 0) {
+                alert('No songs available for download');
+                setIsDownloading(false);
+                return;
+            }
+
+            const confirmed = window.confirm(`Download ${songsToDownload.length} songs?`);
+            if (!confirmed) {
+                setIsDownloading(false);
+                return;
+            }
+
+            for (let i = 0; i < songsToDownload.length; i++) {
+                const song = songsToDownload[i];
+
+                try {
+                    const response = await fetch(song.url || song.audioUrl);
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const blob = await response.blob();
+
+                    const blobUrl = window.URL.createObjectURL(blob);
+
+                    const cleanTitle = (song.title || 'song').replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = `${cleanTitle}.mp3`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    window.URL.revokeObjectURL(blobUrl);
+
+                    if (i < songsToDownload.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                } catch (error) {
+                    console.error(`Failed to download ${song.title}:`, error);
+                }
+            }
+
+            alert(`Started downloading ${songsToDownload.length} songs`);
+        } catch (error) {
+            console.error('Download error:', error);
+            alert('Download failed. Please try again.');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
     const MainPlayButton = (
+        <div className="flex gap-3">
         <button
             className="bg-green-500 hover:bg-green-400 rounded-full w-12 h-12 flex items-center justify-center"
             onClick={() => {
@@ -165,6 +239,23 @@ const ArtistPage = () => {
                 <Play className="w-5 h-5 text-black fill-black ml-[1px]" />
             )}
         </button>
+        {isPremiumUser && (
+            <button
+                className={`text-gray-400 hover:text-white transition-colors ${
+                    isDownloading ? 'opacity-50 cursor-not-allowed' : ''
+                }`}
+                onClick={downloadAllSongs}
+                disabled={isDownloading}
+                title={isDownloading ? 'Downloading...' : 'Download all visible songs'}
+            >
+                {isDownloading ? (
+                    <div className="w-6 h-6 border-2 border-gray-400 border-t-white rounded-full animate-spin"></div>
+                ) : (
+                    <Download className="w-6 h-6" />
+                )}
+            </button>
+        )}
+        </div>
     );
 
     if (loading) return <div className="text-white p-4">Loading artist...</div>;

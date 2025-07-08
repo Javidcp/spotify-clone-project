@@ -3,7 +3,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import { Play, Pause, Plus, MoreHorizontal, Menu, LayoutList, List, Clock, Download } from 'lucide-react';
 import { useDispatch, useSelector } from 'react-redux';
-import Logo from "../../assets/Spotify logo.png";
+import Logo from "../assets/Spotify logo.png";
 import { 
     fetchPlaylistSongs,
     setCurrentPlaylist,
@@ -23,14 +23,13 @@ import {
     selectIsLoadingForPlaylist,
     selectErrorForPlaylist,
     selectCurrentPlaylistId
-} from '../../redux/playerSlice';
-import BottomPlayer from '../Player';
-import VideoPlayer from './VideoPlayer';
-import api from '../../utils/axios';
-import Dot from "../Dot"
-import { addRecentlyPlayedPlaylist } from '../../redux/recentlyPlayedPlaylistsSlice';
-import LikeButton from '../LikkedButton';
-import useAuth from '../../hooks/useAuth';
+} from '../redux/playerSlice';
+import BottomPlayer from './Player';
+import api from '../utils/axios';
+import Dot from "./Dot"
+import { addRecentlyPlayedPlaylist } from '../redux/recentlyPlayedPlaylistsSlice';
+import LikeButton from './LikkedButton';
+import useAuth from '../hooks/useAuth';
 
 const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay, setDropdownOpen, dropdownOpen, isCurrentPlaylist }) => {
     const isCurrentSong = currentTrackId === song.id;
@@ -212,7 +211,7 @@ const SongRowCompact = React.memo(({ song, index, currentTrackId, isPlaying, onP
 SongRowList.displayName = 'SongRowList';
 SongRowCompact.displayName = 'SongRowCompact';
 
-const Inside = () => {
+const PlaylistInside = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [viewMode, setViewMode] = useState('List');
     const [isScrolled, setIsScrolled] = useState(false);
@@ -333,7 +332,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                 } else {
                     console.warn('Redux fetch failed, trying direct API call');
 
-                    const { data } = await api.get(`/genre-playlists/${playlistId}`);
+                    const { data } = await api.get(`/playlist/${playlistId}`);
                     
                     if (!isMounted) return;
                     
@@ -345,7 +344,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                             ...song,
                             id: song._id || song.id,
                             audioUrl: song.audioUrl || song.url || song.src || song.audio || song.file,
-                            video: song.video || song.videoUrl || null
+                            
                         }));
 
                         // console.log('Processed songs:', processedSongs);
@@ -377,7 +376,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
         const fetchPlaylistMetadata = async () => {
             if (!genrePlaylist && playlistId) {
                 try {
-                    const { data } = await api.get(`/genre-playlists/${playlistId}`);
+                    const { data } = await api.get(`/playlist/${playlistId}`);
                     if (isMounted) {
                         setGenrePlaylist(data);
                     }
@@ -801,4 +800,4 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
     );
 };
 
-export default Inside;
+export default PlaylistInside;

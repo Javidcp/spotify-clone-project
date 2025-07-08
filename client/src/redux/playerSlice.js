@@ -292,7 +292,6 @@ export const {
   setLikedSongs,
 } = playerSlice.actions;
 
-// Updated selectors
 export const selectCurrentPlaylistId = (state) => state.player.currentPlaylistId;
 export const selectCurrentTrackId = (state) => state.player.currentTrackId;
 export const selectCurrentTrackIndex = (state) => state.player.currentTrackIndex;
@@ -366,7 +365,6 @@ export const selectErrorForPlaylist = (playlistId) => (state) => {
     : null;
 };
 
-// Fixed selectCurrentTrack selector
 export const selectCurrentTrack = (state) => {
   const playlistId = state.player.currentPlaylistId;
   const index = state.player.currentTrackIndex;
@@ -375,7 +373,7 @@ export const selectCurrentTrack = (state) => {
   let songs = [];
 
   if (playlistId === "likedsong") {
-    songs = state.player.likedSongs; // Use likedSongs from player state
+    songs = state.player.likedSongs;
   } else if (playlistId && state.player.playlists[playlistId]) {
     songs = state.player.playlists[playlistId].songs;
   }

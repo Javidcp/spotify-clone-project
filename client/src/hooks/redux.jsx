@@ -95,6 +95,24 @@ export const usePlayer = () => {
     }
   }, [dispatch, songs]);
 
+  const seekForward = useCallback((seconds = 10) => {
+    const audio = uiState.audioRef;
+    if (audio && !isNaN(audio.duration)) {
+      const newTime = Math.min(audio.currentTime + seconds, audio.duration);
+      audio.currentTime = newTime;
+      dispatch(setCurrentTime(newTime));
+    }
+  }, [dispatch, uiState.audioRef]);
+
+  const seekBackward = useCallback((seconds = 10) => {
+    const audio = uiState.audioRef;
+    if (audio) {
+      const newTime = Math.max(audio.currentTime - seconds, 0);
+      audio.currentTime = newTime;
+      dispatch(setCurrentTime(newTime));
+    }
+  }, [dispatch, uiState.audioRef]);
+
   const playPause = useCallback(() => {
     if (currentTrackId && currentTrack) {
       dispatch(togglePlay());
@@ -147,30 +165,25 @@ export const usePlayer = () => {
     dispatch(setShowVideoComponent(false));
   }, [dispatch]);
 
-  
-
-const skipNext = useCallback(() => {
-  if (songs.length > 0 && currentTrackIndex < songs.length - 1) {
-    const nextIndex = currentTrackIndex + 1;
-    const nextSong = songs[nextIndex];
-    if (nextSong) {
-      playTrack(nextSong.id, nextIndex);
+  const skipNext = useCallback(() => {
+    if (songs.length > 0 && currentTrackIndex < songs.length - 1) {
+      const nextIndex = currentTrackIndex + 1;
+      const nextSong = songs[nextIndex];
+      if (nextSong) {
+        playTrack(nextSong.id, nextIndex);
+      }
     }
-  }
-}, [songs, currentTrackIndex, playTrack]);
+  }, [songs, currentTrackIndex, playTrack]);
 
-const skipPrevious = useCallback(() => {
-  if (songs.length > 0 && currentTrackIndex > 0) {
-    const prevIndex = currentTrackIndex - 1;
-    const prevSong = songs[prevIndex];
-    if (prevSong) {
-      playTrack(prevSong.id, prevIndex);
+  const skipPrevious = useCallback(() => {
+    if (songs.length > 0 && currentTrackIndex > 0) {
+      const prevIndex = currentTrackIndex - 1;
+      const prevSong = songs[prevIndex];
+      if (prevSong) {
+        playTrack(prevSong.id, prevIndex);
+      }
     }
-  }
-}, [songs, currentTrackIndex, playTrack]);
-
-
-
+  }, [songs, currentTrackIndex, playTrack]);
 
   const actions = useMemo(() => ({
     skipNext,
@@ -208,6 +221,8 @@ const skipPrevious = useCallback(() => {
     hasTrackLoaded,
     error: uiState.error,
     pausePlayback,
+    seekForward,
+    seekBackward,
     clearTrack,
     playTrack,
     playPause,
@@ -221,6 +236,8 @@ const skipPrevious = useCallback(() => {
     currentTrack,
     isPlaying,
     hasTrackLoaded,
+    seekForward,
+    seekBackward,
     pausePlayback,
     clearTrack,
     uiState,

@@ -49,6 +49,7 @@ import SingleSong from './components/SingleSong';
 import Coupan from './admin/Coupan';
 import Success from './pages/Success';
 import Failed from './pages/Failed';
+import PlaylistInside from './components/PlaylistInside';
 
 const router = createBrowserRouter([
   { path: '', element: <><RootLayout/> <GlobalAudioManager/> </>, errorElement: <ErrorPage/> , children: [
@@ -65,7 +66,8 @@ const router = createBrowserRouter([
     { path: '/artist/:artistId', element: <ProtectedRoute><ArtistPage /></ProtectedRoute> },
     {path: '/full', element: <ProtectedRoute><FullSong/></ProtectedRoute>},
     { path: '/liked', element: <ProtectedRoute><LikedSong/></ProtectedRoute> },
-    { path: '/createplaylist', element: <ProtectedRoute><CreatePlaylist/></ProtectedRoute> }
+    { path: '/createplaylist', element: <ProtectedRoute><CreatePlaylist/></ProtectedRoute> },
+    { path: '/createdplaylist/:playlistId', element: <PlaylistInside/> }
   ]},
   { path: '/signup', element: <AuthProtected><Sigup /></AuthProtected> },
   { path: '/login', element: <AuthProtected><Login /></AuthProtected> },
@@ -93,7 +95,6 @@ const App = () => {
   const dispatch = useDispatch();
   const user = useSelector(state => state.auth.user);
   const userId = useSelector((state) => state.auth.user?._id);
-
 
 
   useEffect(() => {
@@ -158,7 +159,6 @@ const App = () => {
     fetchUser();
   }, [dispatch]);
 
-console.log(userId, "ecx");
 
 
 

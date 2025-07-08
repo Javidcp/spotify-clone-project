@@ -21,7 +21,7 @@ const BrowseInterface = () => {
         const handleSongs = async () => {
             try {
                 const res = await api.get('/genre')
-                const colorData = res.data.playlists.map(item => ({
+                const colorData = res.data.data.map(item => ({
                     ...item,
                     bgColor: getRandomColor()
                 }))

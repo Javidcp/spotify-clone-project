@@ -29,7 +29,7 @@ useEffect(() => {
 
 useEffect(() => {
   registerAudioRef(audioRef.current);
-  // registerVideoRef(videoRef.current); // if implemented
+  // registerVideoRef(videoRef.current);
 }, []);
 
 
