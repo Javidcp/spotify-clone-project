@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/axios';
 
-// Fetch notifications
 export const fetchNotifications = createAsyncThunk(
   'notifications/fetch',
   async (userId) => {
@@ -10,7 +9,6 @@ export const fetchNotifications = createAsyncThunk(
   }
 );
 
-// Mark all as read
 export const markAllAsRead = createAsyncThunk(
   'notifications/markAllAsRead',
   async (userId) => {

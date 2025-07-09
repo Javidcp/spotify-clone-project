@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-unused-vars */
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -6,6 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Logo from "../../assets/Spotify logo.png";
 import { 
     fetchPlaylistSongs,
+    fetchPlaylistMetadata,
     setCurrentPlaylist,
     setSongsForPlaylist,
     playTrackFromPlaylist,
@@ -22,7 +24,8 @@ import {
     selectSongsForPlaylist,
     selectIsLoadingForPlaylist,
     selectErrorForPlaylist,
-    selectCurrentPlaylistId
+    selectCurrentPlaylistId,
+    selectPlaylistMetadata
 } from '../../redux/playerSlice';
 import BottomPlayer from '../Player';
 import VideoPlayer from './VideoPlayer';
@@ -46,7 +49,6 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
     }, [setDropdownOpen, dropdownOpen, song.id]);
 
     const handleDropdownItemClick = useCallback((item) => {
-        // console.log('Clicked:', item.label);
         setDropdownOpen(null);
     }, [setDropdownOpen]);
 
@@ -119,6 +121,7 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
                             setIsOpen={() => setDropdownOpen(null)}
                             position="right"
                             onItemClick={handleDropdownItemClick}
+                            song={song}
                         />
                     </div>
                 )}
@@ -216,7 +219,6 @@ const Inside = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [viewMode, setViewMode] = useState('List');
     const [isScrolled, setIsScrolled] = useState(false);
-    const [genrePlaylist, setGenrePlaylist] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(null);
     const [visibleSongsCount, setVisibleSongsCount] = useState(5);
     const { user } = useAuth()
@@ -237,12 +239,11 @@ const Inside = () => {
     
     const isLoadingPlaylist = useSelector(selectIsLoadingForPlaylist(playlistId));
     const playlistError = useSelector(selectErrorForPlaylist(playlistId));
+    const genrePlaylist = useSelector(selectPlaylistMetadata(playlistId));
     
     const isCurrentPlaylist = useMemo(() => currentPlaylistId === playlistId, [currentPlaylistId, playlistId]);
     
-    const songs = useSelector((state) =>
-        state.player.playlists[playlistId]?.songs || []
-    );
+    const songs = useSelector(selectSongsForPlaylist(playlistId));
 
     useEffect(() => {
         setVisibleSongsCount(3);
@@ -263,138 +264,60 @@ const Inside = () => {
     useEffect(() => {
         if (playlistId) {
             dispatch(setSelectedPlaylist(playlistId));
-            dispatch(fetchPlaylistSongs(playlistId));
+            dispatch(fetchPlaylistSongs({ playlistId, isGenrePlaylist: true }));
+            dispatch(fetchPlaylistMetadata({ playlistId, isGenrePlaylist: true }));
         }
     }, [playlistId, dispatch]);
 
-const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
+    const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
 
     useEffect(() => {
         if (currentUserId && genrePlaylist) {
-            const playlistId = genrePlaylist._id || genrePlaylist.id;
+            const playlistIdValue = genrePlaylist._id || genrePlaylist.id;
             const playlistName = genrePlaylist.name;
             
-            if (playlistId && playlistName) {
-            const playlistData = {
-                id: playlistId,
-                name: playlistName,
-                cover: genrePlaylist.cover || genrePlaylist.coverImage || genrePlaylist.image,
-                description: genrePlaylist.description || ''
-            };
-            
-            // console.log('Adding playlist to recently played:', playlistData);
-            dispatch(addRecentlyPlayedPlaylist(playlistData));
-            } else {
-            // console.log('Missing required playlist data - ID or Name');
+            if (playlistIdValue && playlistName) {
+                const playlistData = {
+                    id: playlistIdValue,
+                    name: playlistName,
+                    cover: genrePlaylist.cover || genrePlaylist.coverImage || genrePlaylist.image,
+                    description: genrePlaylist.description || ''
+                };
+                
+                dispatch(addRecentlyPlayedPlaylist(playlistData));
             }
-        } else {
-            // console.log('Skipping recently played - User ID:', currentUserId, 'Playlist:', !!genrePlaylist);
         }
     }, [currentUserId, genrePlaylist, dispatch]);
 
     useEffect(() => {
         const timer = setTimeout(() => {
             if (currentUserId && genrePlaylist) {
-                const playlistId = genrePlaylist._id || genrePlaylist.id;
+                const playlistIdValue = genrePlaylist._id || genrePlaylist.id;
                 const playlistName = genrePlaylist.name;
                 
-                if (playlistId && playlistName) {
+                if (playlistIdValue && playlistName) {
                     const playlistData = {
-                    id: playlistId,
-                    name: playlistName,
-                    cover: genrePlaylist.cover || genrePlaylist.coverImage || genrePlaylist.image,
-                    description: genrePlaylist.description || ''
+                        id: playlistIdValue,
+                        name: playlistName,
+                        cover: genrePlaylist.cover || genrePlaylist.coverImage || genrePlaylist.image,
+                        description: genrePlaylist.description || ''
                     };
                     
-                    // console.log('Delayed add to recently played:', playlistData);
                     dispatch(addRecentlyPlayedPlaylist(playlistData));
                 }
             }
         }, 1000);
 
         return () => clearTimeout(timer);
-    }, [playlistId, currentUserId]);
-
-
-    useEffect(() => {
-        let isMounted = true;
-        
-        const fetchGenrePlaylist = async () => {
-            if (!playlistId) return;
-            
-            try {
-                // console.log('Fetching playlist:', playlistId);
-                const result = await dispatch(fetchPlaylistSongs(playlistId));
-
-                if (!isMounted) return;
-
-                if (fetchPlaylistSongs.fulfilled.match(result)) {
-                    // console.log('Playlist songs fetched via Redux:', result.payload);
-                } else {
-                    console.warn('Redux fetch failed, trying direct API call');
-
-                    const { data } = await api.get(`/genre-playlists/${playlistId}`);
-                    
-                    if (!isMounted) return;
-                    
-                    // console.log('Fetched playlist data directly:', data);
-                    setGenrePlaylist(data);
-
-                    if (data.songs && Array.isArray(data.songs)) {
-                        const processedSongs = data.songs.map(song => ({
-                            ...song,
-                            id: song._id || song.id,
-                            audioUrl: song.audioUrl || song.url || song.src || song.audio || song.file,
-                            video: song.video || song.videoUrl || null
-                        }));
-
-                        // console.log('Processed songs:', processedSongs);
-                        dispatch(setSongsForPlaylist({ playlistId, songs: processedSongs }));
-                    }
-                }
-
-                if (!currentPlaylistId || !currentTrack) {
-                    dispatch(setCurrentPlaylist(playlistId));
-                }
-
-            } catch (error) {
-                if (isMounted) {
-                    console.error("Error fetching genre playlist:", error);
-                }
-            }
-        };
-
-        fetchGenrePlaylist();
-        
-        return () => {
-            isMounted = false;
-        };
-    }, [playlistId, dispatch, currentPlaylistId, currentTrack]);
+    }, [playlistId, currentUserId, genrePlaylist, dispatch]);
 
     useEffect(() => {
-        let isMounted = true;
-        
-        const fetchPlaylistMetadata = async () => {
-            if (!genrePlaylist && playlistId) {
-                try {
-                    const { data } = await api.get(`/genre-playlists/${playlistId}`);
-                    if (isMounted) {
-                        setGenrePlaylist(data);
-                    }
-                } catch (error) {
-                    if (isMounted) {
-                        console.error("Error fetching playlist metadata:", error);
-                    }
-                }
+        if (!isCurrentPlaylist || !currentTrack) {
+            if (playlistId) {
+                dispatch(setCurrentPlaylist(playlistId));
             }
-        };
-
-        fetchPlaylistMetadata();
-        
-        return () => {
-            isMounted = false;
-        };
-    }, [genrePlaylist, playlistId]);
+        }
+    }, [playlistId, dispatch, isCurrentPlaylist, currentTrack]);
 
     const handleScroll = useCallback(() => {
         const scrollContainer = scrollRef.current;
@@ -450,73 +373,72 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
         setShowDropdown(prev => !prev);
     }, []);
 
-    
-        const [isDownloading, setIsDownloading] = useState(false);
-    
-        const downloadAllSongs = async () => {
-            if (!isPremiumUser) {
-                alert('Premium subscription required for downloads');
-                return;
-            }
-    
-            if (isDownloading) {
-                return;
-            }
-    
-            setIsDownloading(true);
-    
-            try {
-                const songsToDownload = visibleSongs.filter(song => song.url || song.audioUrl);
-    
-                if (songsToDownload.length === 0) {
-                    alert('No songs available for download');
-                    setIsDownloading(false);
-                    return;
-                }
-    
-                const confirmed = window.confirm(`Download ${songsToDownload.length} songs?`);
-                if (!confirmed) {
-                    setIsDownloading(false);
-                    return;
-                }
-    
-                for (let i = 0; i < songsToDownload.length; i++) {
-                    const song = songsToDownload[i];
-    
-                    try {
-                        const response = await fetch(song.url || song.audioUrl);
-                        if (!response.ok) throw new Error('Network response was not ok');
-    
-                        const blob = await response.blob();
-    
-                        const blobUrl = window.URL.createObjectURL(blob);
-    
-                        const cleanTitle = (song.title || 'song').replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
-                        const link = document.createElement('a');
-                        link.href = blobUrl;
-                        link.download = `${cleanTitle}.mp3`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-    
-                        window.URL.revokeObjectURL(blobUrl);
-    
-                        if (i < songsToDownload.length - 1) {
-                            await new Promise(resolve => setTimeout(resolve, 500));
-                        }
-                    } catch (error) {
-                        console.error(`Failed to download ${song.title}:`, error);
-                    }
-                }
-    
-                alert(`Started downloading ${songsToDownload.length} songs`);
-            } catch (error) {
-                console.error('Download error:', error);
-                alert('Download failed. Please try again.');
-            } finally {
+    const [isDownloading, setIsDownloading] = useState(false);
+
+    const downloadAllSongs = async () => {
+        if (!isPremiumUser) {
+            alert('Premium subscription required for downloads');
+            return;
+        }
+
+        if (isDownloading) {
+            return;
+        }
+
+        setIsDownloading(true);
+
+        try {
+            const songsToDownload = visibleSongs.filter(song => song.url || song.audioUrl);
+
+            if (songsToDownload.length === 0) {
+                alert('No songs available for download');
                 setIsDownloading(false);
+                return;
             }
-        };
+
+            const confirmed = window.confirm(`Download ${songsToDownload.length} songs?`);
+            if (!confirmed) {
+                setIsDownloading(false);
+                return;
+            }
+
+            for (let i = 0; i < songsToDownload.length; i++) {
+                const song = songsToDownload[i];
+
+                try {
+                    const response = await fetch(song.url || song.audioUrl);
+                    if (!response.ok) throw new Error('Network response was not ok');
+
+                    const blob = await response.blob();
+
+                    const blobUrl = window.URL.createObjectURL(blob);
+
+                    const cleanTitle = (song.title || 'song').replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
+                    const link = document.createElement('a');
+                    link.href = blobUrl;
+                    link.download = `${cleanTitle}.mp3`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    window.URL.revokeObjectURL(blobUrl);
+
+                    if (i < songsToDownload.length - 1) {
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    }
+                } catch (error) {
+                    console.error(`Failed to download ${song.title}:`, error);
+                }
+            }
+
+            alert(`Started downloading ${songsToDownload.length} songs`);
+        } catch (error) {
+            console.error('Download error:', error);
+            alert('Download failed. Please try again.');
+        } finally {
+            setIsDownloading(false);
+        }
+    };
 
     const MainPlayButton = useMemo(() => (
         <>
@@ -554,7 +476,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                 )}
             </button>
         )}</>
-    ), [isPlaying, currentTrack, isCurrentPlaylist, songs, handlePlay, dispatch]);
+    ), [isPlaying, currentTrack, isCurrentPlaylist, songs, handlePlay, dispatch, isPremiumUser, isDownloading, downloadAllSongs]);
 
     const SongList = useMemo(() => {
         if (!songs || songs.length === 0) {

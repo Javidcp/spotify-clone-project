@@ -9,11 +9,21 @@ const SideBar = () => {
     const [full, setFull] = useState(false)
     const navigate = useNavigate()
     const [ likes, setLikes ] = useState([])
-    const { isAuthenticated } = useAuth()
+    const { isAuthenticated, user } = useAuth()
     const [ playlists, setPlaylists ] = useState([])
+    const userId = user?._id
+
+    useEffect(() => {
+    if (!userId) {
+        setLikes([]);
+        setPlaylists([]);
+    }
+}, [userId]);
+
 
     useEffect(() => {
         const token = localStorage.getItem("accessToken")
+        if (!userId) return;
         const fetchSongs = async () => {
             try {
                 const { data } = await api.get(`/likedsongs`, {
@@ -27,19 +37,20 @@ const SideBar = () => {
             }
         }
         fetchSongs()
-    }, [])
+    }, [userId])
 
     useEffect(() => {
+        if (!userId) return;
         const fetchPlaylist = async () => {
             try{
-                const res = await api.get('/playlist')
-                setPlaylists(res.data)
+                const res = await api.get(`/user-playlist/${userId}`)
+                setPlaylists(res.data.playlists)
             } catch (err) {
                 console.error("Error to fetching playlist:", err.message)
             }
         }
         fetchPlaylist()
-    }, [])
+    }, [userId])
 
     return (
         <div className={`bg-[#121212] rounded-lg h-[100%] hidden m-1 px-3 pt-5 text-white md:flex flex-col gap-4 ${full === true ? 'items-start pl-[20px] w-100 transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]' : 'items-center transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]'} `}>
@@ -57,7 +68,7 @@ const SideBar = () => {
                         <span className="text-lg font-bold">Your Library</span>
                     )}
                 </div>
-                {full && likes.length < 0 && (
+                {full && (
                     <button onClick={() => navigate('/createplaylist')}  className="flex items-center gap-1 text-sm font-semibold text-[#9a9a9a] hover:text-white">
                         <GoPlus size={25} />
                         Create
@@ -99,15 +110,15 @@ const SideBar = () => {
             )}
 
             {!full && playlists.map((p) => (
-    <div 
-        key={p._id} 
-        onClick={() => navigate(`/createdplaylist/${p._id}`)} 
-        className='flex items-center gap-4 cursor-pointer hover:bg-[#242424] rounded-md w-full'
-    >
-        <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover" />
-        
-    </div>
-))}
+                <div 
+                    key={p._id} 
+                    onClick={() => navigate(`/createdplaylist/${p._id}`)} 
+                    className='flex items-center gap-4 cursor-pointer hover:bg-[#242424] rounded-md w-full'
+                >
+                    <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover" />
+                    
+                </div>
+            ))}
 
 
 {full && playlists.map((p) => (

@@ -1,17 +1,96 @@
+/* eslint-disable no-useless-catch */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../utils/axios';
 
 export const fetchPlaylistSongs = createAsyncThunk(
   'player/fetchPlaylistSongs',
+  async ({ playlistId, isGenrePlaylist = false }) => {
+    try {
+      if (isGenrePlaylist) {
+        const response = await api.get(`/genre-playlists/${playlistId}`);
+        const processedSongs = response.data.songs.map(song => ({
+          ...song,
+          id: song._id,
+          audioUrl: song.audioUrl || song.url || song.src || song.audio || song.file,
+          video: song.video || song.videoUrl || null,
+        }));
+        return { playlistId, songs: processedSongs };
+      }
+      
+      const response = await api.get(`/playlist/${playlistId}`);
+      const processedSongs = response.data.songs.map(song => ({
+        ...song,
+        id: song._id || song.id,
+        audioUrl: song.audioUrl || song.url || song.src || song.audio || song.file,
+        video: song.video || song.videoUrl || null,
+      }));
+      return { playlistId, songs: processedSongs };
+    } catch (error) {
+      if (isGenrePlaylist) {
+        try {
+          const response = await api.get(`/playlist/${playlistId}`);
+          const processedSongs = response.data.songs.map(song => ({
+            ...song,
+            id: song._id || song.id,
+            audioUrl: song.audioUrl || song.url || song.src || song.audio || song.file,
+            video: song.video || song.videoUrl || null,
+          }));
+          return { playlistId, songs: processedSongs };
+        } catch (fallbackError) {
+          throw fallbackError;
+        }
+      } else {
+        try {
+          const response = await api.get(`/genre-playlists/${playlistId}`);
+          const processedSongs = response.data.songs.map(song => ({
+            ...song,
+            id: song._id,
+            audioUrl: song.audioUrl || song.url || song.src || song.audio || song.file,
+            video: song.video || song.videoUrl || null,
+          }));
+          return { playlistId, songs: processedSongs };
+        } catch (fallbackError) {
+          throw fallbackError;
+        }
+      }
+    }
+  }
+);
+
+export const fetchUserPlaylistSongs = createAsyncThunk(
+  'player/fetchUserPlaylistSongs',
   async (playlistId) => {
-    const response = await api.get(`/genre-playlists/${playlistId}`);
+    const response = await api.get(`/playlist/${playlistId}`);
     const processedSongs = response.data.songs.map(song => ({
       ...song,
-      id: song._id,
+      id: song._id || song.id,
       audioUrl: song.audioUrl || song.url || song.src || song.audio || song.file,
       video: song.video || song.videoUrl || null,
     }));
     return { playlistId, songs: processedSongs };
+  }
+);
+
+export const fetchPlaylistMetadata = createAsyncThunk(
+  'player/fetchPlaylistMetadata',
+  async ({ playlistId, isGenrePlaylist = false }) => {
+    try {
+      if (isGenrePlaylist) {
+        const response = await api.get(`/genre-playlists/${playlistId}`);
+        return response.data;
+      } else {
+        const response = await api.get(`/playlist/${playlistId}`);
+        return response.data;
+      }
+    } catch (error) {
+      if (isGenrePlaylist) {
+        const response = await api.get(`/playlist/${playlistId}`);
+        return response.data;
+      } else {
+        const response = await api.get(`/genre-playlists/${playlistId}`);
+        return response.data;
+      }
+    }
   }
 );
 
@@ -35,6 +114,7 @@ const initialState = {
   isShuffling: false,
   bufferedTime: 0,
   likedSongs: [],
+  playlistMetadata: {},
 };
 
 const playerSlice = createSlice({
@@ -132,6 +212,10 @@ const playerSlice = createSlice({
     setHasTrackLoaded: (state, action) => {
       state.hasTrackLoaded = action.payload;
     },
+    setPlaylistMetadata: (state, action) => {
+      const { playlistId, metadata } = action.payload;
+      state.playlistMetadata[playlistId] = metadata;
+    },
     nextTrack: (state) => {
       const currentPlaylistId = state.currentPlaylistId;
       const currentTrackIndex = state.currentTrackIndex;
@@ -221,7 +305,6 @@ const playerSlice = createSlice({
       state.isPlaying = false;
       state.showVideoComponent = false;
     },
-    // Add action to set liked songs
     setLikedSongs: (state, action) => {
       state.likedSongs = action.payload;
     },
@@ -229,7 +312,7 @@ const playerSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchPlaylistSongs.pending, (state, action) => {
-        const playlistId = action.meta.arg;
+        const { playlistId } = action.meta.arg;
         if (!state.playlists[playlistId]) {
           state.playlists[playlistId] = { songs: [], isLoading: true, error: null };
         } else {
@@ -245,15 +328,41 @@ const playerSlice = createSlice({
         }
       })
       .addCase(fetchPlaylistSongs.rejected, (state, action) => {
-        const playlistId = action.meta.arg;
+        const { playlistId } = action.meta.arg;
         if (!state.playlists[playlistId]) {
           state.playlists[playlistId] = { songs: [], isLoading: false, error: action.error.message };
         } else {
           state.playlists[playlistId].isLoading = false;
           state.playlists[playlistId].error = action.error.message;
         }
+      })
+      .addCase(fetchPlaylistMetadata.pending, (state, action) => {
+        const { playlistId } = action.meta.arg;
+        if (!state.playlistMetadata[playlistId]) {
+          state.playlistMetadata[playlistId] = { isLoading: true, error: null };
+        } else {
+          state.playlistMetadata[playlistId].isLoading = true;
+          state.playlistMetadata[playlistId].error = null;
+        }
+      })
+      .addCase(fetchPlaylistMetadata.fulfilled, (state, action) => {
+        const playlistId = action.meta.arg.playlistId;
+        state.playlistMetadata[playlistId] = { 
+          ...action.payload, 
+          isLoading: false, 
+          error: null 
+        };
+      })
+      .addCase(fetchPlaylistMetadata.rejected, (state, action) => {
+        const { playlistId } = action.meta.arg;
+        if (!state.playlistMetadata[playlistId]) {
+          state.playlistMetadata[playlistId] = { isLoading: false, error: action.error.message };
+        } else {
+          state.playlistMetadata[playlistId].isLoading = false;
+          state.playlistMetadata[playlistId].error = action.error.message;
+        }
       });
-  },
+  }
 });
 
 export const {
@@ -290,6 +399,7 @@ export const {
   setSelectedPlaylist,
   seekTo,
   setLikedSongs,
+  setPlaylistMetadata,
 } = playerSlice.actions;
 
 export const selectCurrentPlaylistId = (state) => state.player.currentPlaylistId;
@@ -303,9 +413,11 @@ export const selectIsMuted = (state) => state.player.isMuted;
 export const selectIsLoading = (state) => state.player.isLoading;
 export const selectError = (state) => state.player.error;
 export const selectShowVideoComponent = (state) => state.player.showVideoComponent;
-
 export const selectAllPlaylists = (state) => state.player.playlists;
 export const selectLikedSongs = (state) => state.player.likedSongs;
+
+export const selectPlaylistMetadata = (playlistId) => (state) => 
+  state.player.playlistMetadata[playlistId] || null;
 
 export const selectSongsForCurrentPlaylist = (state) => {
   const playlistId = state.player.currentPlaylistId;

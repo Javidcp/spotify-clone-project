@@ -6,14 +6,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import Logo from "../assets/Spotify logo.png";
 import { 
     fetchPlaylistSongs,
+    fetchPlaylistMetadata,
     setCurrentPlaylist,
-    setSongsForPlaylist,
     playTrackFromPlaylist,
     togglePlay,
     setShowVideoComponent,
     clearCurrentTrack,
     setSelectedPlaylist,
     setIsPlaying,
+    setPlaylistMetadata,
     selectCurrentTrackId,
     selectCurrentTrackIndex,
     selectCurrentTrack,
@@ -22,10 +23,10 @@ import {
     selectSongsForPlaylist,
     selectIsLoadingForPlaylist,
     selectErrorForPlaylist,
-    selectCurrentPlaylistId
+    selectCurrentPlaylistId,
+    selectPlaylistMetadata
 } from '../redux/playerSlice';
 import BottomPlayer from './Player';
-import api from '../utils/axios';
 import Dot from "./Dot"
 import { addRecentlyPlayedPlaylist } from '../redux/recentlyPlayedPlaylistsSlice';
 import LikeButton from './LikkedButton';
@@ -45,7 +46,6 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
     }, [setDropdownOpen, dropdownOpen, song.id]);
 
     const handleDropdownItemClick = useCallback((item) => {
-        // console.log('Clicked:', item.label);
         setDropdownOpen(null);
     }, [setDropdownOpen]);
 
@@ -118,6 +118,7 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
                             setIsOpen={() => setDropdownOpen(null)}
                             position="right"
                             onItemClick={handleDropdownItemClick}
+                            song={song}
                         />
                     </div>
                 )}
@@ -134,7 +135,7 @@ const SongRowCompact = React.memo(({ song, index, currentTrackId, isPlaying, onP
         onPlay(song, index);
     }, [onPlay, song, index]);
 
-        const handleDropdownClick = useCallback((e) => {
+    const handleDropdownClick = useCallback((e) => {
         e.stopPropagation();
         setDropdownOpen(dropdownOpen === song.id ? null : song.id);
     }, [setDropdownOpen, dropdownOpen, song.id]);
@@ -200,6 +201,7 @@ const SongRowCompact = React.memo(({ song, index, currentTrackId, isPlaying, onP
                             setIsOpen={() => setDropdownOpen(null)}
                             position="right"
                             onItemClick={handleDropdownItemClick}
+                            song={song}
                         />
                     </div>
                 )}
@@ -215,12 +217,8 @@ const PlaylistInside = () => {
     const [showDropdown, setShowDropdown] = useState(false);
     const [viewMode, setViewMode] = useState('List');
     const [isScrolled, setIsScrolled] = useState(false);
-    const [genrePlaylist, setGenrePlaylist] = useState(null);
     const [dropdownOpen, setDropdownOpen] = useState(null);
     const [visibleSongsCount, setVisibleSongsCount] = useState(5);
-    const { user } = useAuth()
-    const isPremiumUser = user?.isPremium
-
     
     const scrollRef = useRef(null);
     const navigate = useNavigate();
@@ -233,22 +231,50 @@ const PlaylistInside = () => {
     const isPlaying = useSelector(selectIsPlaying);
     const showVideoComponent = useSelector(selectShowVideoComponent);
     const currentPlaylistId = useSelector(selectCurrentPlaylistId);
+    const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
     
+    const songs = useSelector(selectSongsForPlaylist(playlistId));
     const isLoadingPlaylist = useSelector(selectIsLoadingForPlaylist(playlistId));
     const playlistError = useSelector(selectErrorForPlaylist(playlistId));
+    const playlistMetadata = useSelector(selectPlaylistMetadata(playlistId));
     
     const isCurrentPlaylist = useMemo(() => currentPlaylistId === playlistId, [currentPlaylistId, playlistId]);
-    
-    const songs = useSelector((state) =>
-        state.player.playlists[playlistId]?.songs || []
-    );
 
     useEffect(() => {
-        setVisibleSongsCount(3);
+        if (playlistId) {
+            dispatch(setSelectedPlaylist(playlistId));
+            dispatch(fetchPlaylistSongs({ playlistId, isGenrePlaylist: false }));
+            dispatch(fetchPlaylistMetadata({ playlistId, isGenrePlaylist: false }));
+        }
+    }, [playlistId, dispatch]);
+
+    useEffect(() => {
+        setVisibleSongsCount(5);
     }, [playlistId]);
 
+    useEffect(() => {
+        if (currentUserId && playlistMetadata && !playlistMetadata.isLoading) {
+            const playlistData = {
+                id: playlistId,
+                name: playlistMetadata.name,
+                cover: playlistMetadata.cover || playlistMetadata.coverImage || playlistMetadata.image,
+                description: playlistMetadata.description || ''
+            };
+            
+            if (playlistData.id && playlistData.name) {
+                dispatch(addRecentlyPlayedPlaylist(playlistData));
+            }
+        }
+    }, [currentUserId, playlistMetadata, playlistId, dispatch]);
+
+    useEffect(() => {
+        if (!currentPlaylistId && playlistId && songs.length > 0) {
+            dispatch(setCurrentPlaylist(playlistId));
+        }
+    }, [currentPlaylistId, playlistId, songs.length, dispatch]);
+
     const handleShowMore = useCallback(() => {
-        setVisibleSongsCount(prev => prev + 3);
+        setVisibleSongsCount(prev => prev + 5);
     }, []);
 
     const visibleSongs = useMemo(() => {
@@ -258,142 +284,6 @@ const PlaylistInside = () => {
     const hasMoreSongs = useMemo(() => {
         return songs.length > visibleSongsCount;
     }, [songs.length, visibleSongsCount]);
-
-    useEffect(() => {
-        if (playlistId) {
-            dispatch(setSelectedPlaylist(playlistId));
-            dispatch(fetchPlaylistSongs(playlistId));
-        }
-    }, [playlistId, dispatch]);
-
-const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
-
-    useEffect(() => {
-        if (currentUserId && genrePlaylist) {
-            const playlistId = genrePlaylist._id || genrePlaylist.id;
-            const playlistName = genrePlaylist.name;
-            
-            if (playlistId && playlistName) {
-            const playlistData = {
-                id: playlistId,
-                name: playlistName,
-                cover: genrePlaylist.cover || genrePlaylist.coverImage || genrePlaylist.image,
-                description: genrePlaylist.description || ''
-            };
-            
-            // console.log('Adding playlist to recently played:', playlistData);
-            dispatch(addRecentlyPlayedPlaylist(playlistData));
-            } else {
-            // console.log('Missing required playlist data - ID or Name');
-            }
-        } else {
-            // console.log('Skipping recently played - User ID:', currentUserId, 'Playlist:', !!genrePlaylist);
-        }
-    }, [currentUserId, genrePlaylist, dispatch]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (currentUserId && genrePlaylist) {
-                const playlistId = genrePlaylist._id || genrePlaylist.id;
-                const playlistName = genrePlaylist.name;
-                
-                if (playlistId && playlistName) {
-                    const playlistData = {
-                    id: playlistId,
-                    name: playlistName,
-                    cover: genrePlaylist.cover || genrePlaylist.coverImage || genrePlaylist.image,
-                    description: genrePlaylist.description || ''
-                    };
-                    
-                    // console.log('Delayed add to recently played:', playlistData);
-                    dispatch(addRecentlyPlayedPlaylist(playlistData));
-                }
-            }
-        }, 1000);
-
-        return () => clearTimeout(timer);
-    }, [playlistId, currentUserId]);
-
-
-    useEffect(() => {
-        let isMounted = true;
-        
-        const fetchGenrePlaylist = async () => {
-            if (!playlistId) return;
-            
-            try {
-                // console.log('Fetching playlist:', playlistId);
-                const result = await dispatch(fetchPlaylistSongs(playlistId));
-
-                if (!isMounted) return;
-
-                if (fetchPlaylistSongs.fulfilled.match(result)) {
-                    // console.log('Playlist songs fetched via Redux:', result.payload);
-                } else {
-                    console.warn('Redux fetch failed, trying direct API call');
-
-                    const { data } = await api.get(`/playlist/${playlistId}`);
-                    
-                    if (!isMounted) return;
-                    
-                    // console.log('Fetched playlist data directly:', data);
-                    setGenrePlaylist(data);
-
-                    if (data.songs && Array.isArray(data.songs)) {
-                        const processedSongs = data.songs.map(song => ({
-                            ...song,
-                            id: song._id || song.id,
-                            audioUrl: song.audioUrl || song.url || song.src || song.audio || song.file,
-                            
-                        }));
-
-                        // console.log('Processed songs:', processedSongs);
-                        dispatch(setSongsForPlaylist({ playlistId, songs: processedSongs }));
-                    }
-                }
-
-                if (!currentPlaylistId || !currentTrack) {
-                    dispatch(setCurrentPlaylist(playlistId));
-                }
-
-            } catch (error) {
-                if (isMounted) {
-                    console.error("Error fetching genre playlist:", error);
-                }
-            }
-        };
-
-        fetchGenrePlaylist();
-        
-        return () => {
-            isMounted = false;
-        };
-    }, [playlistId, dispatch, currentPlaylistId, currentTrack]);
-
-    useEffect(() => {
-        let isMounted = true;
-        
-        const fetchPlaylistMetadata = async () => {
-            if (!genrePlaylist && playlistId) {
-                try {
-                    const { data } = await api.get(`/playlist/${playlistId}`);
-                    if (isMounted) {
-                        setGenrePlaylist(data);
-                    }
-                } catch (error) {
-                    if (isMounted) {
-                        console.error("Error fetching playlist metadata:", error);
-                    }
-                }
-            }
-        };
-
-        fetchPlaylistMetadata();
-        
-        return () => {
-            isMounted = false;
-        };
-    }, [genrePlaylist, playlistId]);
 
     const handleScroll = useCallback(() => {
         const scrollContainer = scrollRef.current;
@@ -449,76 +339,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
         setShowDropdown(prev => !prev);
     }, []);
 
-    
-        const [isDownloading, setIsDownloading] = useState(false);
-    
-        const downloadAllSongs = async () => {
-            if (!isPremiumUser) {
-                alert('Premium subscription required for downloads');
-                return;
-            }
-    
-            if (isDownloading) {
-                return;
-            }
-    
-            setIsDownloading(true);
-    
-            try {
-                const songsToDownload = visibleSongs.filter(song => song.url || song.audioUrl);
-    
-                if (songsToDownload.length === 0) {
-                    alert('No songs available for download');
-                    setIsDownloading(false);
-                    return;
-                }
-    
-                const confirmed = window.confirm(`Download ${songsToDownload.length} songs?`);
-                if (!confirmed) {
-                    setIsDownloading(false);
-                    return;
-                }
-    
-                for (let i = 0; i < songsToDownload.length; i++) {
-                    const song = songsToDownload[i];
-    
-                    try {
-                        const response = await fetch(song.url || song.audioUrl);
-                        if (!response.ok) throw new Error('Network response was not ok');
-    
-                        const blob = await response.blob();
-    
-                        const blobUrl = window.URL.createObjectURL(blob);
-    
-                        const cleanTitle = (song.title || 'song').replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
-                        const link = document.createElement('a');
-                        link.href = blobUrl;
-                        link.download = `${cleanTitle}.mp3`;
-                        document.body.appendChild(link);
-                        link.click();
-                        document.body.removeChild(link);
-    
-                        window.URL.revokeObjectURL(blobUrl);
-    
-                        if (i < songsToDownload.length - 1) {
-                            await new Promise(resolve => setTimeout(resolve, 500));
-                        }
-                    } catch (error) {
-                        console.error(`Failed to download ${song.title}:`, error);
-                    }
-                }
-    
-                alert(`Started downloading ${songsToDownload.length} songs`);
-            } catch (error) {
-                console.error('Download error:', error);
-                alert('Download failed. Please try again.');
-            } finally {
-                setIsDownloading(false);
-            }
-        };
-
     const MainPlayButton = useMemo(() => (
-        <>
         <button
             className="bg-green-500 hover:bg-green-400 rounded-full flex items-center justify-center w-12 h-12 transition-all hover:scale-105 focus:outline-none focus:ring-2 focus:ring-green-400"
             onClick={() => {
@@ -537,22 +358,6 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                 <Play className="w-5 h-5 text-black fill-black ml-1" />
             }
         </button>
-        {isPremiumUser && (
-            <button
-                className={`text-gray-400 hover:text-white transition-colors ${
-                    isDownloading ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                onClick={downloadAllSongs}
-                disabled={isDownloading}
-                title={isDownloading ? 'Downloading...' : 'Download all visible songs'}
-            >
-                {isDownloading ? (
-                    <div className="w-6 h-6 border-2 border-gray-400 border-t-white rounded-full animate-spin"></div>
-                ) : (
-                    <Download className="w-6 h-6" />
-                )}
-            </button>
-        )}</>
     ), [isPlaying, currentTrack, isCurrentPlaylist, songs, handlePlay, dispatch]);
 
     const SongList = useMemo(() => {
@@ -567,7 +372,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
         if (viewMode === 'List') {
             return (
                 <>
-                    <div className="grid grid-cols-12 gap-4 px-8 py-3 sticky top-18 bg-[#121212]  text-gray-400 text-sm font-medium border-b border-[#1d1d1d] z-10">
+                    <div className="grid grid-cols-12 gap-4 px-8 py-3 sticky top-18 bg-[#121212] text-gray-400 text-sm font-medium border-b border-[#1d1d1d] z-10">
                         <div className="col-span-1 pl-2">#</div>
                         <div className="col-span-5">Title</div>
                         <div className="col-span-3 hidden sm:block">Album</div>
@@ -591,10 +396,10 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                             />
                         ))}
                         {hasMoreSongs && (
-                            <div className="flex  py-6">
+                            <div className="flex py-6">
                                 <button
                                     onClick={handleShowMore}
-                                    className="px-6 py-2 text-sm font-medium text-[#999999] hover:text-white"
+                                    className="px-6 py-2 text-sm font-medium text-[#999999] hover:text-white transition-colors"
                                 >
                                     See more
                                 </button>
@@ -611,8 +416,8 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                         <div className="col-span-3">Title</div>
                         <div className="col-span-3">Artist</div>
                         <div className="col-span-2">Album</div>
-                        <div className="col-span-2">Date added</div>
-                        <div className="col-span-1 flex justify-center">
+                        <div className="col-span-1">Date added</div>
+                        <div className="col-span-2 flex justify-center">
                             <Clock className="w-4 h-4" />
                         </div>
                     </div>
@@ -627,6 +432,8 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                                 isPlaying={isPlaying}
                                 isCurrentPlaylist={isCurrentPlaylist}
                                 onPlay={handlePlay}
+                                dropdownOpen={dropdownOpen}
+                                setDropdownOpen={setDropdownOpen}
                             />
                         ))}
                         {hasMoreSongs && (
@@ -673,7 +480,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
         return formatted.trim();
     }, [songs]);
 
-    if (isLoadingPlaylist && !genrePlaylist) {
+    if (isLoadingPlaylist && (!playlistMetadata || playlistMetadata.isLoading)) {
         return (
             <div className="flex bg-[#121212] text-white min-h-screen items-center justify-center">
                 <div className="text-center">
@@ -694,7 +501,7 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
         );
     }
 
-    if (!genrePlaylist && !isLoadingPlaylist) {
+    if (!playlistMetadata && !isLoadingPlaylist) {
         return (
             <div className="flex bg-[#121212] text-white min-h-screen items-center justify-center">
                 <div className="text-center text-gray-400">
@@ -707,18 +514,18 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
     return (
         <div className="flex bg-[#121212] text-white min-h-screen">
             <div className="flex-1 rounded-lg" ref={scrollRef}>
-                {genrePlaylist && (
+                {playlistMetadata && (
                     <div
                         className="p-7 relative"
                         style={{
-                            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${genrePlaylist.image})`,
+                            backgroundImage: `linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.7)), url(${playlistMetadata.image || playlistMetadata.cover})`,
                             backgroundSize: "cover",
                             backgroundPosition: "center",
                         }}
                     >
                         <h4 className="text-sm opacity-80">Public Playlist</h4>
-                        <h1 className="text-3xl md:text-8xl font-bold mb-3">{genrePlaylist.name}</h1>
-                        <p className="text-gray-300 mb-2">{genrePlaylist.description}</p>
+                        <h1 className="text-3xl md:text-8xl font-bold mb-3">{playlistMetadata.name}</h1>
+                        <p className="text-gray-300 mb-2">{playlistMetadata.description}</p>
                         <div className="flex mt-1 gap-1 items-center text-sm">
                             <img src={Logo} className='w-6 mr-1' alt="Spotify Logo" />
                             <p className="font-bold">Spotify</p>
@@ -735,12 +542,9 @@ const currentUserId = useSelector(state => state.recentlyPlayed.currentUserId);
                         <div className="flex items-center space-x-4">
                             {MainPlayButton}
                             {!isScrolled && (
-                                <>
-                                    
-                                    <button className="text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded">
-                                        <MoreHorizontal className="w-6 h-6" />
-                                    </button>
-                                </>
+                                <button className="text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded">
+                                    <MoreHorizontal className="w-6 h-6" />
+                                </button>
                             )}
                         </div>
                         <div className="relative">

@@ -2,13 +2,17 @@ import React, { useState } from 'react';
 import api from '../utils/axios';
 import { toast } from 'react-toastify';
 import { useForm } from 'react-hook-form';
+import { useSelector } from 'react-redux';
 
 const CreatePlaylist = () => {
   const { register, handleSubmit, formState: { errors, isSubmitting }, reset, watch } = useForm();
   const [showModal, setShowModal] = useState(false);
   
-  // Watch playlistName input value live to display in UI header
   const playlistName = watch('playlistName')?.trim() || '';
+  const userId = useSelector((state) => state.auth.user?._id);
+  console.log(userId, 'gg');
+  
+
 
   const onSubmit = async (data) => {
     const trimmedName = data.playlistName.trim();
@@ -27,6 +31,7 @@ const CreatePlaylist = () => {
     formData.append("name", trimmedName);
     formData.append("description", data.description || "");
     formData.append("image", data.image[0]);
+    formData.append("userId", userId);
 
     try {
       const res = await api.post("/playlist", formData, {
@@ -35,7 +40,7 @@ const CreatePlaylist = () => {
 
       toast.success(`Created playlist: ${res.data.playlists.name}`);
       reset();
-      setShowModal(false); // Close modal on success
+      setShowModal(false);
     } catch (error) {
       const message = error.response?.data?.message || "Something went wrong!";
       toast.error(`Error: ${message}`);
