@@ -97,16 +97,6 @@ exports.sendTableStyledWelcomeEmail = errorHandling(async(toEmail) => {
                 
                 <tr>
                     <td style="padding: 40px; text-align: center; background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);">
-                        <table cellpadding="0" cellspacing="0" style="margin: 0 auto;">
-                            <tr>
-                                <td>
-                                    <a href="http://localhost:5173/#/login" 
-                                    style="display: inline-block; background: linear-gradient(135deg, #1db954 0%, #1ed760 100%); color: black; text-decoration: none; padding: 18px 40px; border-radius: 50px; font-weight: 700; font-size: 16px; box-shadow: 0 8px 20px rgba(29, 185, 84, 0.3); transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px;">
-                                        🎵 Get Started Now
-                                    </a>
-                                </td>
-                            </tr>
-                        </table>
                         <p style="color: #999; font-size: 14px; margin: 20px 0 0 0; line-height: 1.4;">
                             Ready to dive into your personalized music experience?
                         </p>
