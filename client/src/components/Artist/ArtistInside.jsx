@@ -10,14 +10,15 @@ import Verify from '../../assets/tick.png'
 import LikeButton from "../LikkedButton";
 import useAuth from "../../hooks/useAuth";
 import Dot from '../Dot'
+import { saveAs } from 'file-saver';
 
 const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay, setDropdownOpen, dropdownOpen }) => (
     <div
-        className={`grid grid-cols-12 gap-4 py-2 px-2 rounded-md hover:bg-[#1d1d1d] transition-colors group  ${
+        className={`flex justify-between sm:grid sm:grid-cols-12  sm:gap-4 py-2 sm:px-2 rounded-md  hover:bg-[#1d1d1d] transition-colors group  ${
             currentTrackId === song.id ? 'bg-[#1d1d1d]' : ''
         }`}
     >
-        <div className="col-span-1 flex items-center">
+        <div className="col-span-1 hidden sm:flex items-center">
             {currentTrackId === song.id && isPlaying ? (
                 <div className="flex space-x-1">
                     <div className="w-1 h-4 bg-green-400 animate-pulse"></div>
@@ -33,11 +34,14 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
         </div>
 
         <div className="col-span-5 flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gray-700 rounded flex-shrink-0 overflow-hidden">
+            <div className="w-6 h-6 sm:w-10 sm:h-10 bg-gray-700 rounded flex-shrink-0 overflow-hidden">
                 <img src={song.coverImage} alt={song.title} className="w-full h-full object-cover" loading="lazy" />
             </div>
             <div className="min-w-0">
-                <div className={`font-medium truncate ${currentTrackId === song.id ? 'text-green-400' : 'text-white'}`}>
+                <div className={`hidden sm:block font-medium truncate ${currentTrackId === song.id ? 'text-green-400' : 'text-white'}`}>
+                    {song.title}
+                </div>
+                <div className={`sm:hidden block font-medium truncate ${currentTrackId === song.id ? 'text-green-400' : 'text-white'}`} onClick={() => onPlay(song, index)}>
                     {song.title}
                 </div>
                 <div className="text-sm text-gray-400 truncate">{song.artist.map(a => a.name).join(", ") || 'Unknown'}</div>
@@ -54,12 +58,12 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
             <span className="text-gray-400 text-sm">{song.createdAt.slice(0, 10)}</span>
         </div>
 
-        <div className="col-span-2 flex items-center gap-2 justify-between">
-            <div className="pl-5 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"><LikeButton song={song}/></div>
-            <span className="text-gray-400 text-sm">{song.duration}</span>
+        <div className="sm:col-span-2 flex items-center  gap-2 sm:justify-between justify-end">
+            <div className="pl-5 sm:hover:text-white sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity cursor-pointer"><LikeButton song={song}/></div>
+            <span className="text-gray-400 text-sm hidden sm:block">{song.duration}</span>
             <button 
                 onClick={() => setDropdownOpen(dropdownOpen === song.id ? null : song.id)}  
-                className="w-6 h-6 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
+                className="w-6 h-6 text-gray-400 sm:hover:text-white sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity"
             >
                 <MoreHorizontal className="w-full h-full" />
             </button>
@@ -147,71 +151,15 @@ const ArtistPage = () => {
     
     const isArtistPlaylist = currentPlaylistId === artistId;
 
-    
-    const [isDownloading, setIsDownloading] = useState(false);
-
-    const downloadAllSongs = async () => {
-        if (!isPremiumUser) {
-            alert('Premium subscription required for downloads');
-            return;
-        }
-
-        if (isDownloading) {
-            return;
-        }
-
-        setIsDownloading(true);
-
-        try {
-            const songsToDownload = artistSongs.filter(song => song.url || song.audioUrl);
-
-            if (songsToDownload.length === 0) {
-                alert('No songs available for download');
-                setIsDownloading(false);
-                return;
+    const handleDownloadAll = async () => {
+        for (const song of artistSongs) {
+            try {
+                const response = await fetch(song.url);
+                const blob = await response.blob();
+                saveAs(blob, `${song.title}.mp3`);
+            } catch (err) {
+                console.error(`Failed to download ${song.title}`, err);
             }
-
-            const confirmed = window.confirm(`Download ${songsToDownload.length} songs?`);
-            if (!confirmed) {
-                setIsDownloading(false);
-                return;
-            }
-
-            for (let i = 0; i < songsToDownload.length; i++) {
-                const song = songsToDownload[i];
-
-                try {
-                    const response = await fetch(song.url || song.audioUrl);
-                    if (!response.ok) throw new Error('Network response was not ok');
-
-                    const blob = await response.blob();
-
-                    const blobUrl = window.URL.createObjectURL(blob);
-
-                    const cleanTitle = (song.title || 'song').replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
-                    const link = document.createElement('a');
-                    link.href = blobUrl;
-                    link.download = `${cleanTitle}.mp3`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-
-                    window.URL.revokeObjectURL(blobUrl);
-
-                    if (i < songsToDownload.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                } catch (error) {
-                    console.error(`Failed to download ${song.title}:`, error);
-                }
-            }
-
-            alert(`Started downloading ${songsToDownload.length} songs`);
-        } catch (error) {
-            console.error('Download error:', error);
-            alert('Download failed. Please try again.');
-        } finally {
-            setIsDownloading(false);
         }
     };
 
@@ -241,18 +189,11 @@ const ArtistPage = () => {
         </button>
         {isPremiumUser && (
             <button
-                className={`text-gray-400 hover:text-white transition-colors ${
-                    isDownloading ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                onClick={downloadAllSongs}
-                disabled={isDownloading}
-                title={isDownloading ? 'Downloading...' : 'Download all visible songs'}
+                className={`text-gray-400 hover:text-white transition-colors `}
+                onClick={handleDownloadAll}
+                
             >
-                {isDownloading ? (
-                    <div className="w-6 h-6 border-2 border-gray-400 border-t-white rounded-full animate-spin"></div>
-                ) : (
                     <Download className="w-6 h-6" />
-                )}
             </button>
         )}
         </div>
@@ -264,7 +205,7 @@ const ArtistPage = () => {
         <div className="bg-[#121212] text-white min-h-screen">
             <div>
                 <div className="flex items-center space-x-4 bg-emerald-950 p-5">
-                    <div className="w-48 h-48 bg-emerald-950 rounded-full overflow-hidden shadow-2xl">
+                    <div className="w-20 h-20 md:w-48 md:h-48 bg-emerald-950 rounded-full overflow-hidden shadow-2xl">
                         <img 
                             src={artist.image} 
                             alt={artist.name} 
@@ -273,11 +214,10 @@ const ArtistPage = () => {
                     </div>
                     <div className="space-y-4">
                         <div className="flex items-center space-x-2">
-                            <img src={Verify} className="w-4" alt="" />
-                            <span className="text-sm text-gray-300">Verified Artist</span>
+                            <img src={Verify} className="w-2 md:w-4" alt="" />
+                            <span className="text-xs sm:text-sm text-gray-300">Verified Artist</span>
                         </div>
-                        <h1 className="text-6xl font-bold">{artist.name}</h1>
-                        {/* <p className="text-gray-300 text-lg">{artist.monthlyListeners} monthly listeners</p> */}
+                        <h1 className="text-lg sm:text-6xl font-bold">{artist.name}</h1>
                     </div>
                 </div>
             </div>
@@ -289,10 +229,10 @@ const ArtistPage = () => {
             <div>
                 <div className="grid grid-cols-12 gap-4 px-8 py-3 sticky top-[-5px] bg-[#121212] text-gray-400 text-sm font-medium border-b border-[#1d1d1d]">
                     <div className="col-span-1 pl-2">#</div>
-                    <div className="col-span-5">Title</div>
+                    <div className="sm:col-span-5">Title</div>
                     <div className="col-span-3 hidden sm:block">Album</div>
                     <div className="col-span-1 hidden md:block">Date added</div>
-                    <div className="col-span-2 flex justify-center">
+                    <div className="col-span-2 hidden sm:flex sm:justify-center">
                         <Clock className="w-4 h-4" />
                     </div>
                 </div>

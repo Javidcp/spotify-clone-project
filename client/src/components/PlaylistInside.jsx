@@ -31,6 +31,7 @@ import Dot from "./Dot"
 import { addRecentlyPlayedPlaylist } from '../redux/recentlyPlayedPlaylistsSlice';
 import LikeButton from './LikkedButton';
 import useAuth from '../hooks/useAuth';
+import api from '../utils/axios';
 
 const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay, setDropdownOpen, dropdownOpen, isCurrentPlaylist }) => {
     const isCurrentSong = currentTrackId === song.id;
@@ -330,6 +331,7 @@ const PlaylistInside = () => {
         }
     }, [currentTrackId, isCurrentPlaylist, playlistId, dispatch]);
 
+
     const handleViewChange = useCallback((mode) => {
         setViewMode(mode);
         setShowDropdown(false);
@@ -542,14 +544,14 @@ const PlaylistInside = () => {
                         <div className="flex items-center space-x-4">
                             {MainPlayButton}
                             {!isScrolled && (
-                                <button className="text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded">
+                                <button className="text-gray-400 hover:text-white transition-colors  rounded">
                                     <MoreHorizontal className="w-6 h-6" />
                                 </button>
                             )}
                         </div>
                         <div className="relative">
                             <button
-                                className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded px-2 py-1"
+                                className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors  rounded px-2 py-1"
                                 onClick={toggleDropdown}
                             >
                                 <span className="text-sm">{viewMode}</span>

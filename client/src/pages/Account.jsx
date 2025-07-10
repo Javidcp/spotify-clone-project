@@ -159,11 +159,11 @@ const Account = () => {
     };
 
     return (
-        <div className="relative bg-[#121212]">
+        <div className="relative bg-[#121212] mb-10 sm:mb-0">
             <div className={`transition-all duration-300 ${isOpen ? 'blur-sm scale-95' : ''}`}>
                 <div className='w-full flex items-center  rounded-md overflow-hidden p-5 text-white gap-5'>
                     <div>
-                        <div className="w-60 h-60 bg-black rounded-full flex items-center justify-center overflow-hidden text-white text-5xl font-bold">
+                        <div className="w-20 h-20 sm:w-60 sm:h-60 bg-black rounded-full flex items-center justify-center overflow-hidden text-white text-5xl font-bold">
                             {previewUrl ? (
                                 <img
                                     src={previewUrl}
@@ -176,8 +176,8 @@ const Account = () => {
                         </div>
                     </div>
                     <div>
-                        <span>Profile</span>
-                        <h2 className='text-7xl font-bold mt-2'>{name}</h2>
+                        <span className='text-xs sm:text-sm'>Profile</span>
+                        <h2 className='text-2xl sm:text-7xl font-bold mt-2'>{name}</h2>
                     </div>
                 </div>
                 <div className='p-8 bg-[#191919] text-white'>
@@ -188,19 +188,19 @@ const Account = () => {
                         Edit <Pen size={15} />
                     </button>
                 </div>
-                <div className='flex justify-between items-center'>
+                <div className='flex flex-col sm:flex-row sm:justify-between sm:items-center'>
                     <div>
                         <div className='flex gap-5 items-center'>
                             <div className='flex items-center justify-around mt-3 ml-3 text-white p pl-5 overflow-hidden gap-5 rounded-md border-[#1e1e1e] border-[1.5px] '>
-                                <p className='text-lg font-semibold'>Wallet: </p>
+                                <p className='text-sm sm:text-lg font-semibold'>Wallet: </p>
                                 <div className='flex items-center gap-4'>
-                                    <span className='text-xl font-bold'>{user.rewardPoints || '0'}</span>
-                                    <PiCoinVerticalFill size={20} className='text-yellow-300' />
+                                    <span className='text-sm sm:text-xl font-bold'>{user.rewardPoints || '0'}</span>
+                                    <PiCoinVerticalFill className='text-md sm:text-lg text-yellow-300' />
                                 </div>
                             <button
                                 onClick={handleWithdraw}
                                 disabled={rewardpoint < 500}
-                                className={`p-2  text-black h-18 ${rewardpoint < 500 ? 'bg-[#595959] cursor-not-allowed' : 'cursor-pointer bg-white'} `}
+                                className={`p-2  text-black h-10 sm:h-18 ${rewardpoint < 500 ? 'bg-[#595959] cursor-not-allowed' : 'cursor-pointer bg-white'} `}
                             >
                                 Withdraw
                             </button>
@@ -228,7 +228,7 @@ const Account = () => {
                             </div>
                         )}
                     </div>
-                    <button onClick={handleShare} className='text-white border rounded hover:bg-white hover:text-black h-13 px-5  mt-3 mr-3'>
+                    <button onClick={handleShare} className='text-white border rounded w-fit ml-3 hover:bg-white hover:text-black h-10 sm:h-13 px-5  mt-3 mr-3'>
                         Referral a friend 
                     </button>
                 </div>

@@ -50,13 +50,14 @@ import Coupan from './admin/Coupan';
 import Success from './pages/Success';
 import Failed from './pages/Failed';
 import PlaylistInside from './components/PlaylistInside';
+import PremiumProtect from './components/Auth/Premiumprotect';
 
 const router = createBrowserRouter([
   { path: '', element: <><RootLayout/> <GlobalAudioManager/> </>, errorElement: <ErrorPage/> , children: [
     { path: '/', element: <Home/> },
     { path: '/search', element: <BrowseInterface/> },
     { path: '/account', element: <Account  /> },
-    { path: '/premium', element: <Premium  /> },
+    { path: '/premium', element: <PremiumProtect><Premium  /></PremiumProtect> },
     { path: '/download', element: <Download /> },
     { path: '/notification', element: <Notification /> },
     { path: '/song/:songId', element: <SingleSong/> },

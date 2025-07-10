@@ -14,11 +14,11 @@ const SideBar = () => {
     const userId = user?._id
 
     useEffect(() => {
-    if (!userId) {
-        setLikes([]);
-        setPlaylists([]);
-    }
-}, [userId]);
+        if (!userId) {
+            setLikes([]);
+            setPlaylists([]);
+        }
+    }, [userId]);
 
 
     useEffect(() => {
@@ -37,7 +37,7 @@ const SideBar = () => {
             }
         }
         fetchSongs()
-    }, [userId])
+    }, [userId, likes])
 
     useEffect(() => {
         if (!userId) return;
@@ -50,7 +50,7 @@ const SideBar = () => {
             }
         }
         fetchPlaylist()
-    }, [userId])
+    }, [userId, playlists])
 
     return (
         <div className={`bg-[#121212] rounded-lg h-[100%] hidden m-1 px-3 pt-5 text-white md:flex flex-col gap-4 ${full === true ? 'items-start pl-[20px] w-100 transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]' : 'items-center transition-all duration-500 ease-[cubic-bezier(0.33,1,0.68,1)]'} `}>
@@ -120,19 +120,17 @@ const SideBar = () => {
                 </div>
             ))}
 
+            {full && playlists.map((p) => (
+                <div 
+                    key={p._id} 
+                    onClick={() => navigate(`/createdplaylist/${p._id}`)} 
+                    className='flex items-center gap-4 cursor-pointer hover:bg-[#242424] rounded-md w-full'
+                >
+                    <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover" />
+                    <span className='text-sm'>{p.name}</span>
+                </div>
+            ))}
 
-{full && playlists.map((p) => (
-    <div 
-        key={p._id} 
-        onClick={() => navigate(`/createdplaylist/${p._id}`)} 
-        className='flex items-center gap-4 cursor-pointer hover:bg-[#242424] rounded-md w-full'
-    >
-        <img src={p.image} alt={p.name} className="w-10 h-10 rounded object-cover" />
-        <span className='text-sm'>{p.name}</span>
-    </div>
-))}
-
-            
         </div>
     )
 }

@@ -254,21 +254,6 @@ const onSubmit = async (data) => {
                             </div>
 
                             <div className="flex flex-col items-center">
-                                <span className="text-xs text-gray-400 uppercase tracking-wider font-medium">Usage</span>
-                                <div className="flex items-center gap-1">
-                                <span className="text-sm font-semibold text-blue-400">{item.currentUses}</span>
-                                <span className="text-xs text-gray-500">/</span>
-                                <span className="text-sm font-semibold text-gray-300">{item.maxUses}</span>
-                                </div>
-                                <div className="w-12 h-1 bg-gray-700 rounded-full mt-1">
-                                <div 
-                                    className="h-full bg-blue-400 rounded-full transition-all duration-300"
-                                    style={{ width: `${Math.min((item.currentUses / item.maxUses) * 100, 100)}%` }}
-                                ></div>
-                                </div>
-                            </div>
-
-                            <div className="flex flex-col items-center">
                                 <span className="text-xs text-gray-400 uppercase tracking-wider font-medium">Status</span>
                                 <div className="flex items-center gap-2 mt-1">
                                 <div className={`w-3 h-3 rounded-full ${item.isActive ? 'bg-green-400 shadow-lg shadow-green-400/50' : 'bg-red-500 shadow-lg shadow-red-500/50'}`}></div>

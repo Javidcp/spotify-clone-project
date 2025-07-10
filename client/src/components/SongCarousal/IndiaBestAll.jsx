@@ -13,7 +13,7 @@ const IndiaBestAll = () => {
         const handleSongs = async () => {
             try {
                 const res = await api.get('/genre')
-                setPlaylist(res.data.playlists)
+                setPlaylist(res.data.data)
                 // console.log(res.data);
                 
             } catch (err) {

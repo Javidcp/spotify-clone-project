@@ -55,7 +55,7 @@ const Navbar = () => {
             <div className="flex items-center">
                 <img src={Logo} className='w-8 h-8' alt="" />
                 {isLogged && user && (
-                    <div className='flex gap-1.5 ml-3'>
+                    <div className='hidden md:flex gap-1.5 ml-3'>
                         <button onClick={() => navigate(-1)} className='text-white p-2 bg-[#1e1e1e] rounded-full'>
                             <ChevronLeft size={30} />
                         </button>

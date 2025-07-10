@@ -180,7 +180,7 @@ const Songs = () => {
                                         onClick={() => openModal(song)}
                                         className={`bg-[#1ED760] text-white px-2 py-1 rounded`}
                                     >
-                                        Song Play
+                                        Play Song
                                     </button>
                                 </td>
                                 <td className="p-2 border border-[#191919]">

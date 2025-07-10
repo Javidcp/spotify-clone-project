@@ -73,7 +73,7 @@ exports.deletePlaylist = errorHandling(async (req, res, next) => {
     const { playlistId } = req.params;
 
     const playlist = await Playlist.findByIdAndDelete( playlistId )
-    if (!playlist) return next(createError(404, "Artist not found"))
+    if (!playlist) return next(createError(404, "Playlist not found"))
     res.status(200).json(playlist)
 })
 

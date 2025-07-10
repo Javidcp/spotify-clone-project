@@ -217,7 +217,7 @@ const userId = useSelector((state) => state.auth.user?._id);
         </div>
 
         <div className="flex justify-center items-center  my-4">
-            <div className='border border-gray-300 rounded overflow-hidden'>
+            <div className='border border-[#494949] rounded overflow-hidden'>
                 <input
                     type="text"
                     placeholder="Enter coupon code"

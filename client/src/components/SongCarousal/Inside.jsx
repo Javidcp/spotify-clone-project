@@ -34,6 +34,7 @@ import Dot from "../Dot"
 import { addRecentlyPlayedPlaylist } from '../../redux/recentlyPlayedPlaylistsSlice';
 import LikeButton from '../LikkedButton';
 import useAuth from '../../hooks/useAuth';
+import { saveAs } from 'file-saver';
 
 const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay, setDropdownOpen, dropdownOpen, isCurrentPlaylist }) => {
     const isCurrentSong = currentTrackId === song.id;
@@ -54,79 +55,75 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
 
     return (
         <div
-            className={`grid grid-cols-12 gap-4 py-2 px-2 rounded-md hover:bg-[#1d1d1d] transition-colors group cursor-pointer ${
+            className={`flex justify-between sm:grid sm:grid-cols-12  sm:gap-4 py-2 sm:px-2 rounded-md  hover:bg-[#1d1d1d] transition-colors group ${
                 isCurrentSong ? 'bg-[#1d1d1d]' : ''
             }`}
         >
-            <div className="col-span-1 flex items-center">
-                {isCurrentSong && isPlaying && isCurrentPlaylist ? (
-                    <div className="flex space-x-1">
-                        <div className="w-1 h-4 bg-green-400 animate-pulse"></div>
-                        <div className="w-1 h-4 bg-green-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                        <div className="w-1 h-4 bg-green-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
-                    </div>
-                ) : (
-                    <>
-                        <span className="text-gray-400 group-hover:hidden">{index + 1}</span>
-                        <Play className="w-4 h-4 text-white hidden group-hover:block cursor-pointer" onClick={handlePlayClick}/>
-                    </>
-                )}
-            </div>
-
-            <div className="col-span-5 flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gray-700 rounded flex-shrink-0 overflow-hidden">
-                    <img 
-                        src={song.coverImage} 
-                        alt={song.title} 
-                        className="w-full h-full object-cover" 
-                        loading="lazy"
-                        onError={(e) => {
-                            e.target.style.display = 'none';
-                        }}
-                    />
+            <div className="col-span-1 hidden sm:flex items-center">
+            {currentTrackId === song.id && isPlaying ? (
+                <div className="flex space-x-1">
+                    <div className="w-1 h-4 bg-green-400 animate-pulse"></div>
+                    <div className="w-1 h-4 bg-green-400 animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-1 h-4 bg-green-400 animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                 </div>
-                <div className="min-w-0">
-                    <div className={`font-medium truncate ${isCurrentSong ? 'text-green-400' : 'text-white'}`}>
-                        {song.title}
-                    </div>
-                    <div className="text-sm text-gray-400 truncate">
-                        {song.artist?.map(a => a.name).join(", ") || 'Unknown'}
-                    </div>
+            ) : (
+                <>
+                    <span className="text-gray-400 group-hover:hidden">{index + 1}</span>
+                    <Play className="w-4 h-4 text-white hidden group-hover:block" onClick={() => onPlay(song, index)}/>
+                </>
+            )}
+        </div>
+
+        <div className="col-span-5 flex items-center space-x-3">
+            <div className="w-6 h-6 sm:w-10 sm:h-10 bg-gray-700 rounded flex-shrink-0 overflow-hidden">
+                <img src={song.coverImage} alt={song.title} className="w-full h-full object-cover" loading="lazy" />
+            </div>
+            <div className="min-w-0">
+                <div className={`hidden sm:block font-medium truncate ${currentTrackId === song.id ? 'text-green-400' : 'text-white'}`}>
+                    {song.title}
                 </div>
-            </div>
-
-            <div className="col-span-3 hidden sm:flex items-center">
-                <span className="text-gray-400 text-sm truncate hover:underline cursor-pointer">
-                    {song.genre?.name || "Unknown"}
-                </span>
-            </div>
-
-            <div className="col-span-1 md:flex items-center hidden">
-                <span className="text-gray-400 text-sm">{song.createdAt?.slice(0, 10) || 'N/A'}</span>
-            </div>
-
-            <div className="col-span-2 flex items-center gap-2 justify-between">
-                <span className='hover:text-white opacity-0 group-hover:opacity-100 transition-opacity'><LikeButton song={song}/></span>
-                <span className="text-gray-400 text-sm">{song.duration || '0:00'}</span>
-                <button 
-                    onClick={handleDropdownClick}
-                    className="w-6 h-6 text-gray-400 hover:text-white opacity-0 group-hover:opacity-100 transition-opacity"
-                >
-                    <MoreHorizontal className="w-full h-full" />
-                </button>
-                {dropdownOpen === song.id && (
-                    <div className="relative z-50">
-                        <Dot
-                            isOpen={true}
-                            setIsOpen={() => setDropdownOpen(null)}
-                            position="right"
-                            onItemClick={handleDropdownItemClick}
-                            song={song}
-                        />
-                    </div>
-                )}
+                <div className={`sm:hidden block font-medium truncate ${currentTrackId === song.id ? 'text-green-400' : 'text-white'}`} onClick={() => onPlay(song, index)}>
+                    {song.title}
+                </div>
+                <div className="text-sm text-gray-400 truncate">{song.artist.map(a => a.name).join(", ") || 'Unknown'}</div>
             </div>
         </div>
+
+        <div className="col-span-3 hidden sm:flex items-center">
+            <span className="text-gray-400 text-sm truncate hover:underline cursor-pointer">
+                {song.genre?.name || "Unknown"}
+            </span>
+        </div>
+
+        <div className="col-span-1 md:flex items-center hidden">
+            <span className="text-gray-400 text-sm">{song.createdAt.slice(0, 10)}</span>
+        </div>
+
+        <div className="sm:col-span-2 flex items-center  gap-2 sm:justify-between justify-end">
+            <div className="pl-5 sm:hover:text-white sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity cursor-pointer"><LikeButton song={song}/></div>
+            <span className="text-gray-400 text-sm hidden sm:block">{song.duration}</span>
+            <button 
+                onClick={() => setDropdownOpen(dropdownOpen === song.id ? null : song.id)}  
+                className="w-6 h-6 text-gray-400 sm:hover:text-white sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity"
+            >
+                <MoreHorizontal className="w-full h-full" />
+            </button>
+            {dropdownOpen === song.id && (
+                <div className="relative z-50">
+                    <Dot
+                        isOpen={true}
+                        setIsOpen={() => setDropdownOpen(null)}
+                        position="right"
+                        onItemClick={() => {
+                            // console.log('Clicked:', item.label);
+                            setDropdownOpen(null);
+                        }}
+                        song={song?._id}
+                    />
+                </div>
+            )}
+        </div>
+    </div>
     );
 });
 
@@ -373,72 +370,20 @@ const Inside = () => {
         setShowDropdown(prev => !prev);
     }, []);
 
-    const [isDownloading, setIsDownloading] = useState(false);
 
-    const downloadAllSongs = async () => {
-        if (!isPremiumUser) {
-            alert('Premium subscription required for downloads');
-            return;
-        }
 
-        if (isDownloading) {
-            return;
-        }
-
-        setIsDownloading(true);
-
-        try {
-            const songsToDownload = visibleSongs.filter(song => song.url || song.audioUrl);
-
-            if (songsToDownload.length === 0) {
-                alert('No songs available for download');
-                setIsDownloading(false);
-                return;
+    const handleDownloadAll = async () => {
+        for (const song of songs) {
+            try {
+                const response = await fetch(song.url);
+                const blob = await response.blob();
+                saveAs(blob, `${song.title}.mp3`);
+            } catch (err) {
+                console.error(`Failed to download ${song.title}`, err);
             }
-
-            const confirmed = window.confirm(`Download ${songsToDownload.length} songs?`);
-            if (!confirmed) {
-                setIsDownloading(false);
-                return;
-            }
-
-            for (let i = 0; i < songsToDownload.length; i++) {
-                const song = songsToDownload[i];
-
-                try {
-                    const response = await fetch(song.url || song.audioUrl);
-                    if (!response.ok) throw new Error('Network response was not ok');
-
-                    const blob = await response.blob();
-
-                    const blobUrl = window.URL.createObjectURL(blob);
-
-                    const cleanTitle = (song.title || 'song').replace(/[^a-zA-Z0-9\s-_]/g, '').replace(/\s+/g, '_');
-                    const link = document.createElement('a');
-                    link.href = blobUrl;
-                    link.download = `${cleanTitle}.mp3`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-
-                    window.URL.revokeObjectURL(blobUrl);
-
-                    if (i < songsToDownload.length - 1) {
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    }
-                } catch (error) {
-                    console.error(`Failed to download ${song.title}:`, error);
-                }
-            }
-
-            alert(`Started downloading ${songsToDownload.length} songs`);
-        } catch (error) {
-            console.error('Download error:', error);
-            alert('Download failed. Please try again.');
-        } finally {
-            setIsDownloading(false);
         }
     };
+
 
     const MainPlayButton = useMemo(() => (
         <>
@@ -462,21 +407,14 @@ const Inside = () => {
         </button>
         {isPremiumUser && (
             <button
-                className={`text-gray-400 hover:text-white transition-colors ${
-                    isDownloading ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-                onClick={downloadAllSongs}
-                disabled={isDownloading}
-                title={isDownloading ? 'Downloading...' : 'Download all visible songs'}
+                className={`text-gray-400 hover:text-white transition-colors `}
+                onClick={handleDownloadAll}
             >
-                {isDownloading ? (
-                    <div className="w-6 h-6 border-2 border-gray-400 border-t-white rounded-full animate-spin"></div>
-                ) : (
+                
                     <Download className="w-6 h-6" />
-                )}
             </button>
         )}</>
-    ), [isPlaying, currentTrack, isCurrentPlaylist, songs, handlePlay, dispatch, isPremiumUser, isDownloading, downloadAllSongs]);
+    ), [isPlaying, currentTrack, isCurrentPlaylist, songs, handlePlay, dispatch, isPremiumUser ]);
 
     const SongList = useMemo(() => {
         if (!songs || songs.length === 0) {
@@ -490,12 +428,12 @@ const Inside = () => {
         if (viewMode === 'List') {
             return (
                 <>
-                    <div className="grid grid-cols-12 gap-4 px-8 py-3 sticky top-18 bg-[#121212]  text-gray-400 text-sm font-medium border-b border-[#1d1d1d] z-10">
+                    <div className="grid grid-cols-12 gap-4 px-8 py-3 sticky top-[-5px] bg-[#121212] text-gray-400 text-sm font-medium border-b border-[#1d1d1d]">
                         <div className="col-span-1 pl-2">#</div>
-                        <div className="col-span-5">Title</div>
+                        <div className="sm:col-span-5">Title</div>
                         <div className="col-span-3 hidden sm:block">Album</div>
                         <div className="col-span-1 hidden md:block">Date added</div>
-                        <div className="col-span-2 flex justify-center">
+                        <div className="col-span-2 hidden sm:flex sm:justify-center">
                             <Clock className="w-4 h-4" />
                         </div>
                     </div>
@@ -641,12 +579,12 @@ const Inside = () => {
                     >
                         <h4 className="text-sm opacity-80">Public Playlist</h4>
                         <h1 className="text-3xl md:text-8xl font-bold mb-3">{genrePlaylist.name}</h1>
-                        <p className="text-gray-300 mb-2">{genrePlaylist.description}</p>
+                        <p className="text-xs sm:text-sm text-gray-300 mb-2">{genrePlaylist.description}</p>
                         <div className="flex mt-1 gap-1 items-center text-sm">
-                            <img src={Logo} className='w-6 mr-1' alt="Spotify Logo" />
-                            <p className="font-bold">Spotify</p>
-                            <span className="w-1 rounded-full bg-gray-300 h-1"></span>
-                            <div className="font-semibold text-gray-300">
+                            <img src={Logo} className='hidden sm:block w-6 mr-1' alt="Spotify Logo" />
+                            <p className="hidden sm:block font-bold">Spotify</p>
+                            <span className="hidden sm:block w-1 rounded-full bg-gray-300 h-1"></span>
+                            <div className="font-semibold text-xs sm:text-sm text-gray-300">
                                 {songs.length} songs, about {totalDuration}
                             </div>
                         </div>
@@ -660,13 +598,13 @@ const Inside = () => {
                             {!isScrolled && (
                                 <>
                                     
-                                    <button className="text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded">
+                                    <button className="hidden text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded">
                                         <MoreHorizontal className="w-6 h-6" />
                                     </button>
                                 </>
                             )}
                         </div>
-                        <div className="relative">
+                        <div className="hidden sm:block relative">
                             <button
                                 className="flex items-center space-x-2 text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded px-2 py-1"
                                 onClick={toggleDropdown}
@@ -676,7 +614,7 @@ const Inside = () => {
                             </button>
 
                             {showDropdown && (
-                                <div className="absolute right-0 top-full mt-2 bg-[#1a1a1a] rounded-md shadow-lg z-30 min-w-[150px]">
+                                <div className=" absolute right-0 top-full mt-2 bg-[#1a1a1a] rounded-md shadow-lg z-30 min-w-[150px]">
                                     <div className="py-1">
                                         <span className="flex items-center space-x-3 px-4 py-2 text-sm font-semibold text-gray-300">
                                             View as

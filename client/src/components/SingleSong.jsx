@@ -83,7 +83,7 @@ if (!songData) {
   return (
     <div className={`bg-[#121212]  text-white`}>
       <div className="flex items-end p-8 pb-6 bg-[#234e21]">
-        <div className="w-60 h-60 mr-6 shadow-2xl">
+        <div className="w-20 h-20 sm:w-60 sm:h-60 mr-6 shadow-2xl">
           <img 
             src={songData.coverImage} 
             alt={`${songData.title} cover`} 
@@ -92,22 +92,21 @@ if (!songData) {
           />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-medium mb-2">{songData.type}</p>
-          <h1 className="text-4xl md:text-6xl font-black mb-4 leading-tight">
+          <h1 className="text-md sm:text-4xl md:text-6xl font-black mb-4 leading-tight">
             {songData.title}
           </h1>
           <div className="flex items-center text-sm text-gray-300 flex-wrap">
             {songData.artist.map((artist, i) => (
               <span key={artist._id || i}>
-                <span className={i === 0 ? "font-medium text-white" : ""}>
+                <span className={i === 0 ? "text-xs smLtext-sm font-medium text-white" : ""}>
                   {artist.name}
                 </span>
               </span>
             ))}
             <span className="mx-1">•</span>
-            <span>{songData.createdAt.slice(0,4)}</span>
+            <span className='text-xs sm:text-sm'>{songData.createdAt.slice(0,4)}</span>
             <span className="mx-1">•</span>
-            <span>1 song - {songData.duration}</span>
+            <span className='text-xs sm:text-sm'>1 song - {songData.duration}</span>
           </div>
         </div>
       </div>
@@ -116,12 +115,12 @@ if (!songData) {
         <div className="flex items-center gap-6">
           <button
             onClick={handlePlay}
-            className="bg-green-500 hover:bg-green-400 transition-colors rounded-full p-4"
+            className="bg-green-500 hover:bg-green-400 transition-colors rounded-full p-2 sm:p-4"
             disabled={!songData.url}
           >
             {isCurrentSongPlaying ?
-              <Pause className="w-6 h-6 text-black fill-black" /> :
-              <Play className="w-6 h-6 text-black fill-black ml-1" />
+              <Pause className="w-3 sm:w-6 h-3 sm:h-6 text-black fill-black" /> :
+              <Play className="w-3 sm:w-6 h-3 sm:h-6 text-black fill-black " />
             }
           </button>
 
@@ -137,14 +136,13 @@ if (!songData) {
         </div>
       </div>
 
-      <div className="px-8">
+      <div className="px-0 sm:px-8">
         <div className="flex items-center justify-between py-2 border-b border-gray-700 mb-2">
           <div className="flex items-center text-gray-400 text-sm">
             <span className="w-8 text-center"></span>
-            <span className="ml-4">Title</span>
+            <span className="ml-4">#Title</span>
           </div>
-          <div className="flex items-center gap-8">
-            {/* <span className="text-gray-400 text-sm">Plays</span> */}
+          <div className="hidden sm:flex items-center gap-8">
             <Clock className="w-4 h-4 text-gray-400" />
             <span></span>
             <span></span>
@@ -174,19 +172,19 @@ if (!songData) {
                 onError={(e) => { e.target.src = '/api/placeholder/40/40'; }}
               />
               <div>
-                <div className="text-white font-medium">{songData.title}</div>
-                <div className="text-gray-400 text-sm">{songData.artist.map(a => a.name)}</div>
+                <div className="text-sm sm:text-md text-white font-medium">{songData.title}</div>
+                <div className="text-gray-400 text-xs sm:text-sm">{songData.artist.map(a => a.name)}</div>
               </div>
             </div>
           </div>
 
           <div className="flex items-center gap-8">
-            <span className="text-gray-400 text-sm">{songData.duration}</span>
-            <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <span className="text-gray-400 sm:block hidden text-sm">{songData.duration}</span>
+            <div className="sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity">
               {/* <Plus className="w-4 h-4 text-gray-400 hover:text-white" /> */}
               <LikeButton song={songData} />
             </div>
-            <button className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <button className="sm:opacity-0 sm:group-hover:opacity-100 sm:transition-opacity">
               <MoreHorizontal className="w-4 h-4 text-gray-400 hover:text-white" />
             </button>
             

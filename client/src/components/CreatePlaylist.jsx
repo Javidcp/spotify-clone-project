@@ -51,37 +51,21 @@ const CreatePlaylist = () => {
     <div className="min-h-screen bg-[#121212] rounded-t-md overflow-hidden text-white flex flex-col md:flex-row">
       <div className="flex-1 overflow-y-auto">
         <div className="flex items-end p-6 bg-[#212121] cursor-pointer" onClick={() => setShowModal(true)}>
-          <div className="w-48 h-48 bg-[#121212] flex items-center justify-center mr-6 shadow-xl">
-            <span className="text-white text-8xl opacity-70">&#9835;</span>
+          <div className="w-20 h-20 sm:w-48 sm:h-48 bg-[#121212] flex items-center justify-center mr-6 shadow-xl">
+            <span className="text-white text-2xl sm:text-8xl opacity-70">&#9835;</span>
           </div>
 
           <div className="flex flex-col justify-end text-white">
-            <p className="text-sm uppercase tracking-wider text-gray-300 mb-1">
+            <p className="text-xs sm:text-sm uppercase tracking-wider text-gray-300 mb-1">
               Public Playlist
             </p>
-            <h1 className="text-7xl font-bold leading-tight mb-2 truncate max-w-xs">
+            <h1 className="text-md sm:text-7xl font-bold leading-tight mb-2 truncate max-w-xs">
               {playlistName || 'MyPlaylist#1'}
             </h1>
-            <p className="text-base text-gray-300">Name</p>
           </div>
         </div>
 
-        <div className="flex items-center px-6 py-4 bg-[#121212]">
-          <button
-            aria-label="More options"
-            className="text-gray-400 hover:text-white mr-4 text-3xl font-bold"
-          >
-            ...
-          </button>
-          <button
-            aria-label="Menu"
-            className="text-gray-400 hover:text-white text-2xl ml-auto"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+        
 
         
       </div>
@@ -159,7 +143,7 @@ const CreatePlaylist = () => {
               &times;
             </button>
 
-            <div className='absolute bottom-5 left-6 right-6 text-xs font-bold text-gray-400'>
+            <div className='hidden sm:block absolute bottom-5 left-6 right-6 text-xs font-bold text-gray-400'>
               By proceeding, you agree to give Spotify access to the image you choose to upload. Please make sure you have the right to upload the image.
             </div>
           </div>

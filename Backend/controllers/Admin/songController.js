@@ -28,11 +28,11 @@ exports.addSong = errorHandling(async (req, res, next) => {
         { $push: { songs: savedSong._id } }
     );
     
-    const message = `New song added: ${title}`;
+    const message = `New song is added`;
     const allUsers = await User.find({});
 
     const notifications = await Notification.insertMany(
-        allUsers.map(user => ({ userId: user._id, message, songId: savedSong._id }))
+        allUsers.map(user => ({ userId: user._id, message, title, coverImage: coverImageFile, songId: savedSong._id }))
     );
     
     const io = getIO();

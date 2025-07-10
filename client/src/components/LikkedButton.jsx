@@ -7,12 +7,14 @@ import { updateLikedSongs } from "../redux/playerSlice";
 const LikeButton = ({ song }) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
+  console.log(song._id);
+  
 
   const likedSongs = useSelector((state) => state.player.likedSongs || []);
   
   const isLiked = likedSongs.some((s) => {
-    const likedId = typeof s === 'object' ? s._id : s;
-    return likedId === song._id;
+    const likedId = typeof s === 'object' ? s?._id : s;
+    return likedId === song?._id;
   });
 
   const handleToggleLike = async (e) => {
@@ -23,7 +25,7 @@ const LikeButton = ({ song }) => {
     setIsLoading(true);
     
     try {
-      const { data } = await api.post("/likedSongs", { songId: song._id });
+      const { data } = await api.post("/likedSongs", { songId: song?._id });
       dispatch(updateLikedSongs(data.likedSongs));
     } catch (error) {
       console.error("Error toggling liked song:", error);

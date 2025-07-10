@@ -45,7 +45,6 @@ const Dropdown = ({ width = 'w-64', position = 'right', isOpen = false, setIsOpe
                             : p
                     )
                 );
-
                 toast.info('Song removed from playlist');
             } else {
                 await api.post('/playlist/add-song', { playlistId: playlist._id, songId });
@@ -57,7 +56,6 @@ const Dropdown = ({ width = 'w-64', position = 'right', isOpen = false, setIsOpe
                             : p
                     )
                 );
-
                 toast.success('Song added to playlist');
             }
 

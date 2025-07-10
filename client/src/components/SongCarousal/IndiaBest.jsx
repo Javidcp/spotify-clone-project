@@ -11,17 +11,13 @@ const SongCarousel = () => {
   const [showRightArrow, setShowRightArrow] = useState(true);
   const navigate = useNavigate()
   const [plays, setPlay] = useState([])
-  
-    const currentPlaylistId = useSelector((state) => state.player.currentPlaylistId);
-
-
+  const currentPlaylistId = useSelector((state) => state.player.currentPlaylistId);
 
   useEffect(() => {
     const handleSongs = async () => {
       try {
           const res = await api.get('/genre')
           setPlay(res.data.data)
-          // console.log(res.data);
           
       } catch (err) {
         toast.error("Error in fetching Playlist:", err)
