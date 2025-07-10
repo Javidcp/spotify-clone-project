@@ -51,7 +51,7 @@ const SpotifyArtistCarousel = () => {
     };
 
     return (
-        <div className="bg-[#121212] text-white p-6">
+        <div className="bg-[#121212] text-white p-6  mb-10 sm:mb-0">
         <div className="w-full mx-auto">
             <div className="mb-6 flex justify-between items-center">
                 <div>

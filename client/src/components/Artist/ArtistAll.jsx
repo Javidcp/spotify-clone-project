@@ -24,7 +24,7 @@ const SpotifyArtist = () => {
     }, [])
 
     return (
-        <div className="bg-[#121212] text-white p-6">
+        <div className="bg-[#121212] text-white p-6  mb-10 sm:mb-0">
             <div className="w-full mx-auto">
                 <div className="mb-6">
                     <h1 className="md:text-3xl text-sm font-bold mb-2">Popular Artists</h1>

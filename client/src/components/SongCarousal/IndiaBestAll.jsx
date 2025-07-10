@@ -24,7 +24,7 @@ const IndiaBestAll = () => {
     }, [])
 
     return (
-        <div className="bg-[#121212] text-white min-h-screen p-8">
+        <div className="bg-[#121212] text-white min-h-screen p-8  mb-10 sm:mb-0">
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                 {playlists.map((playlist) => (
                     <Link key={playlist.id} to={`/playlist/${playlist._id}`}>

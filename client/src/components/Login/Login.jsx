@@ -153,17 +153,11 @@ useEffect(() => {
             credential: credentialResponse.credential,
         });
 
-        // Store access token
         localStorage.setItem("accessToken", res.data.token);
-
-        // Set Authorization header for future requests
         api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
-
-        // Update Redux
         dispatch(setUser(res.data.user));
         dispatch(setAuth(true));
-
-        reset(); // Form reset or cleanup
+        reset();
         navigate("/");
     } catch (error) {
         console.error(error.response?.data?.message || "Google login failed");
@@ -175,7 +169,7 @@ useEffect(() => {
     return (
         <>
             {view === 1 && (
-                <div style={{background: "linear-gradient(0deg, black, #1F1F1F 80%)"}} className='pt-5 text-white flex flex-col items-center justify-center'>
+                <div style={{background: "min-h-screen linear-gradient(0deg, black, #1F1F1F 80%)"}} className='pt-5 text-white flex flex-col items-center justify-center'>
                     <div className='md:w-[700px] p-4 rounded-xl text-center flex flex-col items-center' style={{background: "linear-gradient(0deg, #1F1F1F, black 30%)"}}>
                         <div className="flex justify-center">
                             <img src={Logo} alt="Logo" className="w-10 h-10" />
@@ -237,7 +231,7 @@ useEffect(() => {
             )}
 
             {view === 2 && (
-                <div className='bg-[#121212] h-screen flex justify-between py-4 px-8'>
+                <div className='bg-[#121212] min-h-screen flex justify-between py-4 px-8'>
                     <img src={Logo} className='w-6 h-6' alt="" />
                     <div className="flex flex-col items-center w-fit py-16">
                         <p className="text-white text-2xl mb-8" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>
@@ -288,7 +282,7 @@ useEffect(() => {
             )}
 
             {view === 3 && (
-                <div style={{background: "linear-gradient(0deg, black, #1F1F1F 80%)"}} className='pt-5 text-white flex flex-col items-center justify-center'>
+                <div style={{background: "min-h-screen linear-gradient(0deg, black, #1F1F1F 80%)"}} className='pt-5 text-white flex flex-col items-center justify-center'>
                     <div className='md:w-[700px] p-4 rounded-xl text-center flex flex-col items-center' style={{background: "linear-gradient(0deg, #1F1F1F, black 30%)"}}>
                         <div className="flex justify-center">
                             <img src={Logo} alt="Logo" className="w-10 h-10" />

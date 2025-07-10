@@ -55,7 +55,7 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
 
     return (
         <div
-            className={`flex justify-between sm:grid sm:grid-cols-12  sm:gap-4 py-2 sm:px-2 rounded-md  hover:bg-[#1d1d1d] transition-colors group ${
+            className={`flex justify-between sm:grid sm:grid-cols-12  mb-10 sm:mb-0 sm:gap-4 py-2 sm:px-2 rounded-md  hover:bg-[#1d1d1d] transition-colors group ${
                 isCurrentSong ? 'bg-[#1d1d1d]' : ''
             }`}
         >
@@ -146,7 +146,7 @@ const SongRowCompact = React.memo(({ song, index, currentTrackId, isPlaying, onP
 
     return (
         <div
-            className={`grid grid-cols-12 gap-4 py-2 rounded-md hover:bg-[#1d1d1d] transition-colors group cursor-pointer ${
+            className={`grid grid-cols-12 gap-4 py-2  mb-10 sm:mb-0 rounded-md hover:bg-[#1d1d1d] transition-colors group cursor-pointer ${
                 isCurrentSong ? 'bg-[#1d1d1d]' : ''
             }`}
         >
