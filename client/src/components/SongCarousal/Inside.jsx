@@ -55,7 +55,7 @@ const SongRowList = React.memo(({ song, index, currentTrackId, isPlaying, onPlay
 
     return (
         <div
-            className={`flex justify-between sm:grid sm:grid-cols-12  mb-10 sm:mb-0 sm:gap-4 py-2 sm:px-2 rounded-md  hover:bg-[#1d1d1d] transition-colors group ${
+            className={`flex justify-between sm:grid sm:grid-cols-12  sm:gap-4 py-2 sm:px-2 rounded-md  hover:bg-[#1d1d1d] transition-colors group ${
                 isCurrentSong ? 'bg-[#1d1d1d]' : ''
             }`}
         >
@@ -437,7 +437,7 @@ const Inside = () => {
                             <Clock className="w-4 h-4" />
                         </div>
                     </div>
-                    <div className="px-6">
+                    <div className="px-6  mb-10 sm:mb-0">
                         {visibleSongs.map((song, index) => (
                             <SongRowList
                                 key={`${song.id || song._id}-${index}`}
@@ -478,7 +478,7 @@ const Inside = () => {
                         </div>
                     </div>
 
-                    <div>
+                    <div className=' mb-10 sm:mb-0'>
                         {visibleSongs.map((song, index) => (
                             <SongRowCompact
                                 key={`${song.id || song._id}-${index}`}
