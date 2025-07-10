@@ -1,15 +1,22 @@
-import axios from 'axios';
+import axios from "axios";
 
 const api = axios.create({
     baseURL: import.meta.env.VITE_API_URL,
     withCredentials: true,
 });
 
+const token = localStorage.getItem("accessToken");
+if (token) {
+    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+}
+
 const getNewAccessToken = async () => {
     try {
-        const res = await axios.post(`${import.meta.env.VITE_API_URL}/auth/refresh-token`, {}, {
-        withCredentials: true,
-        });
+        const res = await axios.post(
+        `${import.meta.env.VITE_API_URL}/auth/refresh-token`,
+        {},
+        { withCredentials: true }
+        );
         return res.data.token;
     } catch (error) {
         console.error("Refresh token failed", error);
@@ -27,8 +34,9 @@ api.interceptors.response.use(
 
         const newToken = await getNewAccessToken();
         if (newToken) {
-            localStorage.setItem('accessToken', newToken);
-            originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+            localStorage.setItem("accessToken", newToken);
+            api.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
+            originalRequest.headers["Authorization"] = `Bearer ${newToken}`;
             return api(originalRequest);
         }
         }

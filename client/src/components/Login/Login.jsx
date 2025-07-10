@@ -148,22 +148,29 @@ useEffect(() => {
     };
 
     const handleGoogleSuccess = async (credentialResponse) => {
-        try {
-            const res = await api.post("/auth/google-auth", {
-                credential: credentialResponse.credential,
-            });
-            
-            localStorage.setItem("accessToken", res.data.token);
-            dispatch(setUser(res.data.user));
-            dispatch(setAuth(true));
+    try {
+        const res = await api.post("/auth/google-auth", {
+            credential: credentialResponse.credential,
+        });
 
-            reset();
-            navigate("/");
-        } catch (error) {
-            console.error(error.response?.data?.message || "Google login failed");
-            toast.error("Google login failed");
-        }
-    };
+        // Store access token
+        localStorage.setItem("accessToken", res.data.token);
+
+        // Set Authorization header for future requests
+        api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+
+        // Update Redux
+        dispatch(setUser(res.data.user));
+        dispatch(setAuth(true));
+
+        reset(); // Form reset or cleanup
+        navigate("/");
+    } catch (error) {
+        console.error(error.response?.data?.message || "Google login failed");
+        toast.error(error.response?.data?.message || "Google login failed");
+    }
+};
+
 
     return (
         <>

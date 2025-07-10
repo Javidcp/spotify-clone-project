@@ -123,13 +123,12 @@ exports.loginUser = errorHandling(async (req, res, next) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None",
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-});
-
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     res.json({
         message: "Login successful",
@@ -195,18 +194,18 @@ exports.googleAuth = errorHandling(async (req, res, next) => {
     const accessToken = generateAccessToken(user);
     const refreshToken = generateRefreshToken(user);
 
-res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "None", 
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-});
-
-    console.log(req.cookies, "cookieeee");
+    res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None", 
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
     
 
     res.json({
         message: "Google login successful",
+        token: accessToken,
+        refreshToken,
         user: {
             _id: user._id,
             username: user.username,

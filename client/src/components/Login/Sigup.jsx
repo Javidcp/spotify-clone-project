@@ -204,32 +204,42 @@ const Signup = () => {
 
                         <div className="space-y-4">
                             <GoogleLogin
-                                onSuccess={async (credentialResponse) => {
-                                    try {
-                                        const urlParams = new URLSearchParams(location.search);
-                                        const referredBy = urlParams.get('ref') || null;
+    onSuccess={async (credentialResponse) => {
+        try {
+            const urlParams = new URLSearchParams(location.search);
+            const referredBy = urlParams.get("ref") || null;
 
-                                        const res = await api.post("/auth/google-auth", {
-                                            credential: credentialResponse.credential, referredBy,
-                                        });
-                                        localStorage.setItem("accessToken", res.data.token);
-                                        dispatch(setUser(res.data.user));
-                                        dispatch(setAuth(true));
-                                        localStorage.removeItem("view");
-                                        navigate("/");
-                                    } catch (error) {
-                                        console.error(error.response?.data?.message || "Google login failed");
-                                    }
-                                }}
-                                onError={() => {
-                                    console.log('Login Failed');
-                                }}
-                                type="standard"
-                                size="large"
-                                width="370"
-                                text="continue_with"
-                                shape="pill"
-                            />
+            const res = await api.post("/auth/google-auth", {
+                credential: credentialResponse.credential,
+                referredBy,
+            });
+
+            // Set access token in localStorage
+            localStorage.setItem("accessToken", res.data.token);
+
+            // Attach token to axios default header
+            api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+
+            // Update Redux state
+            dispatch(setUser(res.data.user));
+            dispatch(setAuth(true));
+
+            localStorage.removeItem("view");
+            navigate("/");
+        } catch (error) {
+            console.error(error.response?.data?.message || "Google login failed");
+        }
+    }}
+    onError={() => {
+        console.log("Google Login Failed");
+    }}
+    type="standard"
+    size="large"
+    width="370"
+    text="continue_with"
+    shape="pill"
+/>
+
                         </div>
 
                         <hr className="text-[#818181] my-8" />
