@@ -169,25 +169,27 @@ useEffect(() => {
     return (
         <>
             {view === 1 && (
-                <div style={{background: "min-h-screen linear-gradient(0deg, black, #1F1F1F 80%)"}} className='pt-5 text-white flex flex-col items-center justify-center'>
+                <div style={{background: "min-h-screen  sm:linear-gradient(0deg, black, #1F1F1F 80%)"}} className='pt-5 text-white flex flex-col items-center justify-center'>
                     <div className='md:w-[700px] p-4 rounded-xl text-center flex flex-col items-center' style={{background: "linear-gradient(0deg, #1F1F1F, black 30%)"}}>
                         <div className="flex justify-center">
                             <img src={Logo} alt="Logo" className="w-10 h-10" />
                         </div>
-                        <h2 className="text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
+                        <h2 className="text-2xl sm:text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
                         
-                        <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={() => {
-                                console.log('Login Failed');
-                                toast.error('Google login failed');
-                            }}
-                            type="standard"
-                            size="large"
-                            width="320"
-                            text="continue_with"
-                            shape="pill"
-                        />
+                        <div className="w-[250px] sm:min-w-[370px]">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => {
+                                    console.log('Login Failed');
+                                    toast.error('Google login failed');
+                                }}
+                                type="standard"
+                                size="large"
+                                width="100%"
+                                text="continue_with"
+                                shape="pill"
+                            />
+                        </div>
 
                         <hr className="w-[80%] my-8 text-zinc-800" />
 
@@ -199,7 +201,7 @@ useEffect(() => {
                                 id="email"
                                 type="email" 
                                 placeholder="name@domain.com" 
-                                className={`border-[0.1rem] rounded-[4px] p-3 w-[320px] mt-1 ${
+                                className={`border-[0.1rem] rounded-[4px] p-3 w-full sm:w-[320px] mt-1 ${
                                     errors.email ? 'border-red-500' : 'border-[#818181]'
                                 }`}
                                 {...register('email', {
@@ -219,12 +221,12 @@ useEffect(() => {
                             </button>
                         </form>
 
-                        <div className="text-[#818181] text-center" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
+                        <div className="mt-2 text-xs sm:text-md text-[#818181] text-center" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
                             Don't have an account? <Link to='/signup' className="underline text-white">Sign up for Spotify</Link>
                         </div>
                     </div>
                     
-                    <div className="text-[#818181] bg-[#1F1F1F] mt-8 w-full text-center p-5 text-xs">
+                    <div className="text-[#818181] bg-[#1F1F1F] mt-8 w-full text-center p-5 text-[8px] sm:text-xs">
                         This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
                     </div>
                 </div>
@@ -234,7 +236,7 @@ useEffect(() => {
                 <div className='bg-[#121212] min-h-screen flex justify-between py-4 px-8'>
                     <img src={Logo} className='w-6 h-6' alt="" />
                     <div className="flex flex-col items-center w-fit py-16">
-                        <p className="text-white text-2xl mb-8" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>
+                        <p className="text-white text-sm sm:text-2xl mb-8" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>
                             Enter the 6-digit code sent to <br />
                             you at {masked}.
                         </p>
@@ -246,14 +248,14 @@ useEffect(() => {
                             renderInput={(props) => (
                                 <input
                                     {...props}
-                                    style={{width: "46px"}}
-                                    className="h-[54px] text-center text-white bg-[#121212] border border-[#818181] rounded-md mx-[6px] text-2xl focus:outline-none focus:ring-1 focus:border-white caret-transparent"
+                                    style={{width: "100%"}}
+                                    className="h-[34px] sm:h-[54px] sm:min-w-[46px] text-center text-white bg-[#121212] border border-[#818181] rounded-md mx-[6px] text-2xl focus:outline-none focus:ring-1 focus:border-white caret-transparent"
                                 />
                             )}
                         />
                         
                         <button
-                            className={`mt-4 w-30 bg-transparent border px-3 py-1 rounded-full text-sm ${ disabled ? 'border-[#191919] text-[#818181]' : 'border-[#818181] text-white hover:bg-[#81818133]'}`}
+                            className={`mt-4 w-20 sm:w-30 bg-transparent border px-3 py-1 rounded-full text-[8px] sm:text-sm ${ disabled ? 'border-[#191919] text-[#818181]' : 'border-[#818181] text-white hover:bg-[#81818133]'}`}
                             style={{ fontFamily: 'CircularStd', fontWeight: 900 }}
                             onClick={handleClick}
                             disabled={disabled}
@@ -271,7 +273,7 @@ useEffect(() => {
 
                         <button 
                             onClick={() => setView(3)} 
-                            className='text-white mt-2 underline' 
+                            className='text-white mt-2 underline text-sm sm:text-md' 
                             style={{ fontFamily: 'CircularStd', fontWeight: 900 }}
                         >
                             Log in with a password
@@ -287,24 +289,26 @@ useEffect(() => {
                         <div className="flex justify-center">
                             <img src={Logo} alt="Logo" className="w-10 h-10" />
                         </div>
-                        <h2 className="text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
+                        <h2 className="text-2xl sm:text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
                         
-                        <GoogleLogin
-                            onSuccess={handleGoogleSuccess}
-                            onError={() => {
-                                console.log('Login Failed');
-                                toast.error('Google login failed');
-                            }}
-                            type="standard"
-                            size="large"
-                            width="320"
-                            text="continue_with"
-                            shape="pill"
-                        />
+                        <div className="w-[250px] sm:min-w-[370px]">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => {
+                                    console.log('Login Failed');
+                                    toast.error('Google login failed');
+                                }}
+                                type="standard"
+                                size="large"
+                                width="100%"
+                                text="continue_with"
+                                shape="pill"
+                            />
+                        </div>
 
                         <hr className="w-[80%] my-8 text-zinc-800" />
 
-                        <form onSubmit={handleSubmit(onSubmit)}  className="my-5 w-[320px] text-left">
+                        <form onSubmit={handleSubmit(onSubmit)}  className="my-5 w-[250px] sm:w-[320px] text-left">
                             <label htmlFor="email-login" className="text-xs font-bold">Email address</label>
                             <input
                                 id="email-login"
@@ -371,19 +375,19 @@ useEffect(() => {
                         
                         <div>
                             <button 
-                                className="underline mb-5" 
+                                className="underline mb-5 text-xs sm:text-md" 
                                 onClick={() => setView(1)}
                             >
                                 Login without password
                             </button>
                         </div>
 
-                        <div className="text-[#818181] text-center" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
+                        <div className="text-[#818181] text-center text-xs sm:text-md" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
                             Don't have an account? <Link to='/signup' className="underline text-white">Sign up for Spotify</Link>
                         </div>
                     </div>
                     
-                    <div className="text-[#818181] bg-[#1F1F1F] mt-8 w-full text-center p-5 text-xs">
+                    <div className="text-[8px] text-[#818181] bg-[#1F1F1F] mt-8 w-full text-center p-5 sm:text-xs">
                         This site is protected by reCAPTCHA and the Google <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
                     </div>
                 </div>

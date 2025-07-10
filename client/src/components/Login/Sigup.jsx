@@ -142,27 +142,27 @@ const Signup = () => {
                     type="checkbox"
                     checked={checked}
                     readOnly
-                    className="opacity-0 absolute w-5 h-5 z-10 cursor-default"
+                    className="opacity-0 absolute w-3 h-3 sm:w-5 sm:h-5 z-10 cursor-default"
                 />
-                <span className={`block w-4 h-4 rounded-full border-2 ${checked ? 'bg-green-500 border-green-500' : 'border-gray-400'}`}>
+                <span className={`block w-3 h-3 sm:w-4 sm:h-4 rounded-full border-2 ${checked ? 'bg-green-500 border-green-500' : 'border-gray-400'}`}>
                     {checked && (
-                        <IoIosCheckmark size={20} className="text-black font-light absolute top-[-1.5px] right-[2px]" />
+                        <IoIosCheckmark size={20} className="text-black font-light absolute top-[-3.5px] sm:top-[-1.5px] right-[4px] sm:right-[2px]" />
                     )}
                 </span>
             </div>
-            <label className="text-sm select-none">{label}</label>
+            <label className="text-xs sm:text-sm select-none">{label}</label>
         </div>
     );
 
     return (
         <>
             {view === 1 && (
-                <div className="bg-[#121212] min-h-screen flex justify-center text-white">
+                <div className="bg-[#121212] min-h-screen flex justify-center px-4 sm:px-0 text-white">
                     <div className='my-8 '>
                         <div className="flex justify-center">
                             <img src={Logo} alt="Logo" className="w-10 h-10 " />
                         </div>
-                        <h2 className="text-center text-5xl/14 mt-7 " style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
+                        <h2 className="text-center text-2xl sm:text-5xl/14 mt-7 " style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
                             Sign up to <br />start listening
                         </h2>
                         
@@ -185,7 +185,7 @@ const Signup = () => {
                                         message: 'Invalid email address'
                                     }
                                 })}
-                                className="border-[0.1rem] rounded-[4px] p-3 w-[100%] mt-1 border-[#818181]" 
+                                className="border-[0.1rem] rounded-[4px] p-3 w-full sm:w-[100%] mt-1 border-[#818181]" 
                             />
                             {emailForm.formState.errors.email && (
                                 <p className="text-red-500 text-xs mt-1">{emailForm.formState.errors.email.message}</p>
@@ -202,53 +202,47 @@ const Signup = () => {
                             <div className="flex-grow border-t border-[#818181]"></div>
                         </div>
 
-                        <div className="space-y-4">
+                        <div className="space-y-4 max-w-[370px] sm:min-w-[370px]">
                             <GoogleLogin
-    onSuccess={async (credentialResponse) => {
-        try {
-            const urlParams = new URLSearchParams(location.search);
-            const referredBy = urlParams.get("ref") || null;
+                                onSuccess={async (credentialResponse) => {
+                                    try {
+                                        const urlParams = new URLSearchParams(location.search);
+                                        const referredBy = urlParams.get("ref") || null;
 
-            const res = await api.post("/auth/google-auth", {
-                credential: credentialResponse.credential,
-                referredBy,
-            });
+                                        const res = await api.post("/auth/google-auth", {
+                                            credential: credentialResponse.credential,
+                                            referredBy,
+                                        });
+                                        localStorage.setItem("accessToken", res.data.token);
+                                        api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+                                        dispatch(setUser(res.data.user));
+                                        dispatch(setAuth(true));
 
-            // Set access token in localStorage
-            localStorage.setItem("accessToken", res.data.token);
-
-            // Attach token to axios default header
-            api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
-
-            // Update Redux state
-            dispatch(setUser(res.data.user));
-            dispatch(setAuth(true));
-
-            localStorage.removeItem("view");
-            navigate("/");
-        } catch (error) {
-            console.error(error.response?.data?.message || "Google login failed");
-        }
-    }}
-    onError={() => {
-        console.log("Google Login Failed");
-    }}
-    type="standard"
-    size="large"
-    width="370"
-    text="continue_with"
-    shape="pill"
-/>
+                                        localStorage.removeItem("view");
+                                        navigate("/");
+                                    } catch (error) {
+                                        console.error(error.response?.data?.message || "Google login failed");
+                                    }
+                                }}
+                                onError={() => {
+                                    console.log("Google Login Failed");
+                                }}
+                                type="standard"
+                                size="large"
+                                width="100%"
+                                text="continue_with"
+                                shape="pill"
+                            />
 
                         </div>
 
                         <hr className="text-[#818181] my-8" />
 
-                        <div className="text-[#818181] text-center" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
+                        <div className="text-[#818181] text-xs sm:text-md text-center" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
                             Already have an account?<Link to='/login' className="underline text-white">Log in here</Link>
                         </div>
 
-                        <div className="text-[13px] text-[#818181] text-center my-5" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
+                        <div className="text-[8px] sm:text-[13px] text-[#818181] text-center my-5" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
                             This site is protected by reCAPTCHA and the Google <br />
                             <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
                         </div>
@@ -264,23 +258,23 @@ const Signup = () => {
                         </div>
                         <div className=' flex justify-center'>
                             <div className='relative text-white my-8 flex justify-center'>
-                                <div className='absolute border-1 w-100 border-[#818181]'></div>
-                                <div className='absolute border-1 w-50 border-green-400 right-0'></div>
+                                <div className='absolute border-1 w-70 sm:w-100 border-[#818181]'></div>
+                                <div className='absolute border-1 w-35 sm:w-50 border-green-400 right-0'></div>
                             </div>
                         </div>
-                        <div className='flex w-[400px] items-center gap-1.5'>
+                        <div className='flex w-[250px] sm:w-[400px] items-center gap-1.5'>
                             <button type="button" onClick={goBack}>
-                                <IoIosArrowBack size={33} className='text-zinc-400' />
+                                <IoIosArrowBack  className='text-zinc-400 text-[20px] sm:text-[30px]' />
                             </button>
                             <div>
-                                <div className="text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>Step 1 of 2</div>
-                                <div className="g">Create a password</div>
+                                <div className="text-zinc-400 text-xs sm:text-md" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>Step 1 of 2</div>
+                                <div className="text-sm sm:text-lg">Create a password</div>
                             </div>
                         </div>
-                        <div className='flex flex-col justify-center items-center my-6'>
+                        <div className='flex flex-col justify-center items-center my-6 mx-auto'>
                             <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)}>
-                                <label className="text-[14px]" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Password</label><br />
-                                <div className='relative flex w-[300px] mb-2'>
+                                <label className="text-xs sm:text-[14px]" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Password</label><br />
+                                <div className='relative flex w-[250px] sm:w-[300px] mb-2'>
                                     <input 
                                         type={showPassword ? 'text' : 'password'} 
                                         {...passwordForm.register('password', {
@@ -297,7 +291,7 @@ const Signup = () => {
                                         {showPassword ? <FaEye size={20} /> : <FaEyeSlash size={20} />}
                                     </div>
                                 </div>
-                                <label htmlFor="" className='text-sm '>Your password must contain at least</label><br />
+                                <label htmlFor="" className='text-xs sm:text-sm '>Your password must contain at least</label><br />
 
                                 <CustomCheckbox checked={hasLetter} label="1 letter" />
                                 <CustomCheckbox checked={hasNumberOrSpecial} label="1 number or special character (example: # ? ! &)" />
@@ -307,7 +301,7 @@ const Signup = () => {
                                     Next
                                 </button>
                             </form>
-                            <div className="text-[13px] text-[#818181] text-center mt-7" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
+                            <div className="text-[8px] sm:text-[13px] text-[#818181] text-center mt-7" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
                                 This site is protected by reCAPTCHA and the Google <br />
                                 <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
                             </div>
@@ -324,23 +318,23 @@ const Signup = () => {
                         </div>
                         <div className=' flex justify-center'>
                             <div className='relative text-white my-8 flex justify-center'>
-                                <div className='absolute border-1 w-100 border-[#818181]'></div>
-                                <div className='absolute border-1 w-50 border-green-400 left-0'></div>
+                                <div className='absolute border-1 w-70 sm:w-100 border-[#818181]'></div>
+                                <div className='absolute border-1 w-70 sm:w-100 border-green-400 '></div>
                             </div>
                         </div>
-                        <div className='flex w-[400px] items-center gap-1.5' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
+                        <div className='flex w-[250px] sm:w-[400px] items-center gap-1.5' style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>
                             <button type="button" onClick={goBack}>
-                                <IoIosArrowBack size={33} className='text-zinc-400' />
+                                <IoIosArrowBack  className='text-zinc-400 text-[20px] sm:text-[30px]' />
                             </button>
                             <div>
-                                <div className="text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>Step 2 of 2</div>
-                                <div className="g">Tell us about yourself</div>
+                                <div className="text-zinc-400 text-xs sm:text-md" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>Step 1 of 2</div>
+                                <div className="text-xs sm:text-md">Tell us about yourself</div>
                             </div>
                         </div>
                         <div className="flex flex-col justify-center items-center my-6">
-                            <form onSubmit={profileForm.handleSubmit(handleRegistration)}>
-                                <label className="text-[14px] block" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Name</label>
-                                <span className="text-[13px] font-light block text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>This name will appear on your profile</span>
+                            <form onSubmit={profileForm.handleSubmit(handleRegistration)} className="px-3">
+                                <label className="text-sm sm:text-[14px] block" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Name</label>
+                                <span className="text-xs sm:text-[13px] font-light block text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>This name will appear on your profile</span>
                                 <input 
                                     type="text" 
                                     {...profileForm.register('name', {
@@ -350,13 +344,13 @@ const Signup = () => {
                                             message: 'Name must be at least 2 characters long'
                                         }
                                     })}
-                                    className="border-1 p-2 w-[320px] mt-2 rounded-sm border-[#818181]" 
+                                    className="border-1 p-2 w-full sm:w-[320px] mt-2 rounded-sm border-[#818181]" 
                                 />
                                 {profileForm.formState.errors.name && (
                                     <p className="text-red-500 text-xs mt-1">{profileForm.formState.errors.name.message}</p>
                                 )}
 
-                                <label className="text-[14px] block mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Date of birth</label>
+                                <label className="text-sm sm:text-[14px] block mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Date of birth</label>
                                 <div className="flex gap-2">
                                     <input 
                                         type="text" 
@@ -377,13 +371,13 @@ const Signup = () => {
                                                 }
                                             }
                                         })}
-                                        className="border-1 p-2 w-[90px] mt-1 rounded-sm border-[#818181] no-spinner" 
+                                        className="border-1 p-2 w-[70px] sm:w-[90px] mt-1 rounded-sm border-[#818181] no-spinner" 
                                     />
                                     <select
                                         {...profileForm.register('dobMonth', {
                                             required: 'Month is required'
                                         })}
-                                        className="border p-2 w-[155px] mt-1 rounded-sm border-[#818181] text-white bg-[#121212]"
+                                        className="border p-2 w-[140px] sm:w-[155px] mt-1 rounded-sm border-[#818181] text-white bg-[#121212]"
                                         defaultValue=""
                                     >
                                         <option value="" disabled>Select Month</option>
@@ -412,7 +406,7 @@ const Signup = () => {
                                                 message: 'Please enter a valid day'
                                             }
                                         })}
-                                        className="border-1 p-2 w-[60px] mt-1 rounded-sm border-[#818181]" 
+                                        className="border-1 p-2 w-[45px] sm:w-[60px] mt-1 rounded-sm border-[#818181]" 
                                     />
                                 </div>
                                 {(profileForm.formState.errors.dobYear || profileForm.formState.errors.dobMonth || profileForm.formState.errors.dobDay) && (
@@ -425,8 +419,8 @@ const Signup = () => {
                                     </p>
                                 )}
 
-                                <label className="text-[14px] block mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Gender</label>
-                                <span className="text-[14px] font-light block text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
+                                <label className="text-sm sm:text-[14px] block mt-5" style={{ fontFamily: 'CircularStd', fontWeight: 900 }}>Gender</label>
+                                <span className="text-xs sm:text-[14px] font-light block text-zinc-400" style={{ fontFamily: 'CircularStd', fontWeight: 400 }}>
                                     We use your gender to help personalize our <br />
                                     content recommendations and ads for you.
                                 </span>
@@ -503,7 +497,7 @@ const Signup = () => {
                                 </button>
                             </form>
 
-                            <div className="text-[13px] text-[#818181] text-center mt-7" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
+                            <div className="text-xs sm:text-[13px] text-[#818181] text-center mt-7" style={{ fontFamily: 'CircularStd', fontWeight: 500 }}>
                                 This site is protected by reCAPTCHA and the Google <br />
                                 <a href="https://policies.google.com/privacy" className="underline">Privacy Policy</a> and <a href="https://policies.google.com/terms" className="underline">Terms of Service</a> apply.
                             </div>
