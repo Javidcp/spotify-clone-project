@@ -176,7 +176,7 @@ useEffect(() => {
                         </div>
                         <h2 className="text-2xl sm:text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
                         
-                        <div className="w-[250px] sm:min-w-[370px]">
+                        <div className="max-w-[370px] sm:w-[370px]">
                             <GoogleLogin
                                 onSuccess={handleGoogleSuccess}
                                 onError={() => {
@@ -291,7 +291,7 @@ useEffect(() => {
                         </div>
                         <h2 className="text-2xl sm:text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
                         
-                        <div className="w-[250px] sm:min-w-[370px]">
+                        <div className="max-w-[370px] sm:w-[370px]">
                             <GoogleLogin
                                 onSuccess={handleGoogleSuccess}
                                 onError={() => {

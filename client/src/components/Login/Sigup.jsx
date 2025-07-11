@@ -202,7 +202,7 @@ const Signup = () => {
                             <div className="flex-grow border-t border-[#818181]"></div>
                         </div>
 
-                        <div className="space-y-4 max-w-[370px] sm:min-w-[370px]">
+                        <div className="space-y-4 max-w-[370px] sm:w-[370px]">
                             <GoogleLogin
                                 onSuccess={async (credentialResponse) => {
                                     try {
