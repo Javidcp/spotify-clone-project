@@ -176,7 +176,7 @@ useEffect(() => {
                         </div>
                         <h2 className="text-2xl sm:text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
                         
-                        <div className="max-w-[370px] sm:w-[370px]">
+                        <div className="max-w-[370px] sm:min-w-[370px]">
                             <GoogleLogin
                                 onSuccess={handleGoogleSuccess}
                                 onError={() => {
@@ -249,7 +249,7 @@ useEffect(() => {
                                 <input
                                     {...props}
                                     style={{width: "100%"}}
-                                    className="h-[34px] sm:h-[54px] sm:min-w-[46px] text-center text-white bg-[#121212] border border-[#818181] rounded-md mx-[6px] text-2xl focus:outline-none focus:ring-1 focus:border-white caret-transparent"
+                                    className="h-[34px] sm:h-[54px] sm:max-w-[46px] text-center text-white bg-[#121212] border border-[#818181] rounded-md mx-[6px] text-2xl focus:outline-none focus:ring-1 focus:border-white caret-transparent"
                                 />
                             )}
                         />
@@ -291,7 +291,7 @@ useEffect(() => {
                         </div>
                         <h2 className="text-2xl sm:text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
                         
-                        <div className="max-w-[370px] sm:w-[370px]">
+                        <div className="max-w-[370px] sm:min-w-[370px]">
                             <GoogleLogin
                                 onSuccess={handleGoogleSuccess}
                                 onError={() => {

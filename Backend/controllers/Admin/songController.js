@@ -48,7 +48,7 @@ exports.getAllSongs = errorHandling(async (req, res) => {
     const limit = parseInt(req.query.limit) || 10
     const skip = (page - 1) * limit
 
-    const songs = await Song.find().populate('artist').populate("genre").skip(skip).limit(limit)
+    const songs = await Song.find().populate('artist').populate("genre").skip(skip).limit(limit).sort({ createdAt: -1 })
     const total = await Song.countDocuments()
     res.status(200).json({ page, totalPages: Math.ceil(total / limit), totalItems: total, data: songs });
 });

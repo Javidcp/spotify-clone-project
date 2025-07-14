@@ -3,7 +3,7 @@ const User = require("../../models/User")
 
 exports.getAllUsers = async (req, res) => {
     try {
-        const users = await User.find().select("-password");
+        const users = await User.find().select("-password").sort({ createdAt: -1 });
         res.status(200).json(users);
     } catch (err) {
         console.error(err);
@@ -29,7 +29,6 @@ exports.toggleBlockUser = errorHandling(async (req, res, next) => {
 
 
 exports.getUserRegisterationStats = errorHandling( async (req, res, next) => {
-
   const today = new Date();
   const last7Days = new Date();
   last7Days.setDate(today.getDate() - 6);
