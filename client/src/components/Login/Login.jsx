@@ -176,7 +176,7 @@ useEffect(() => {
                         </div>
                         <h2 className="text-2xl sm:text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
                         
-                        <div className="max-w-[370px] sm:min-w-[370px]">
+                        <div className="hidden sm:flex">
                             <GoogleLogin
                                 onSuccess={handleGoogleSuccess}
                                 onError={() => {
@@ -185,7 +185,21 @@ useEffect(() => {
                                 }}
                                 type="standard"
                                 size="large"
-                                width="100%"
+                                width="370"
+                                text="continue_with"
+                                shape="pill"
+                            />
+                        </div>
+                        <div className="sm:hidden flex items-center justify-center">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => {
+                                    console.log('Login Failed');
+                                    toast.error('Google login failed');
+                                }}
+                                type="standard"
+                                size="large"
+                                width="230"
                                 text="continue_with"
                                 shape="pill"
                             />
@@ -291,7 +305,7 @@ useEffect(() => {
                         </div>
                         <h2 className="text-2xl sm:text-4xl my-8" style={{ fontFamily: 'CircularStd', fontWeight: 700 }}>Log in to Spotify</h2>
                         
-                        <div className="max-w-[370px] sm:min-w-[370px]">
+                        <div className="hidden sm:flex">
                             <GoogleLogin
                                 onSuccess={handleGoogleSuccess}
                                 onError={() => {
@@ -300,7 +314,21 @@ useEffect(() => {
                                 }}
                                 type="standard"
                                 size="large"
-                                width="100%"
+                                width="370"
+                                text="continue_with"
+                                shape="pill"
+                            />
+                        </div>
+                        <div className="sm:hidden flex items-center justify-center">
+                            <GoogleLogin
+                                onSuccess={handleGoogleSuccess}
+                                onError={() => {
+                                    console.log('Login Failed');
+                                    toast.error('Google login failed');
+                                }}
+                                type="standard"
+                                size="large"
+                                width="230"
                                 text="continue_with"
                                 shape="pill"
                             />

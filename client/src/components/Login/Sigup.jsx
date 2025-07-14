@@ -202,7 +202,7 @@ const Signup = () => {
                             <div className="flex-grow border-t border-[#818181]"></div>
                         </div>
 
-                        <div className="space-y-4 max-w-[370px] sm:min-w-[370px]">
+                        <div className="space-y-4 sm:flex hidden">
                             <GoogleLogin
                                 onSuccess={async (credentialResponse) => {
                                     try {
@@ -229,7 +229,40 @@ const Signup = () => {
                                 }}
                                 type="standard"
                                 size="large"
-                                width="100%"
+                                width="370"
+                                text="continue_with"
+                                shape="pill"
+                            />
+
+                        </div>
+                        <div className="space-y-4 flex sm:hidden items-center justify-center">
+                            <GoogleLogin
+                                onSuccess={async (credentialResponse) => {
+                                    try {
+                                        const urlParams = new URLSearchParams(location.search);
+                                        const referredBy = urlParams.get("ref") || null;
+
+                                        const res = await api.post("/auth/google-auth", {
+                                            credential: credentialResponse.credential,
+                                            referredBy,
+                                        });
+                                        localStorage.setItem("accessToken", res.data.token);
+                                        api.defaults.headers.common["Authorization"] = `Bearer ${res.data.token}`;
+                                        dispatch(setUser(res.data.user));
+                                        dispatch(setAuth(true));
+
+                                        localStorage.removeItem("view");
+                                        navigate("/");
+                                    } catch (error) {
+                                        console.error(error.response?.data?.message || "Google login failed");
+                                    }
+                                }}
+                                onError={() => {
+                                    console.log("Google Login Failed");
+                                }}
+                                type="standard"
+                                size="medium"
+                                width="230"
                                 text="continue_with"
                                 shape="pill"
                             />
